@@ -1,21 +1,63 @@
-# Taxonomic analysis {#tax}
+# Introduction {#intro}
 
-You can label chapter and section titles using `{#label}` after them, e.g., we can reference Chapter \@ref(intro). If you do not manually label them, there will be automatic labels anyway, e.g., Chapter \@ref(methods).
+## Motivation
 
-Figures and tables with captions will be placed in `figure` and `table` environments, respectively.
+Fungaria collections and citizen science observations (e.g.,[iNaturalist](https://www.inaturalist.org), [MushroomObserver](https://mushroomobserver.org)) typically contain taxonomic, geographic, and temporal information for each fungal specimen. Additionally, these records also often contain trait-relevant metadata about the host, habitat, or substrate associated with the collected or observed specimens; thus, these records are well-suited for comprehensive investigations into taxonomic, geographic, and temporal patterns of ecological traits. The first step in pursuing these investigations is accessing data and generating a data set. Citizen science platforms and many fungaria have online interfaces for downloading data from their respective databases. This is useful if you are only interested in the specimen records from one particular database; however, if you are interested in maximizing the size of your data set and conducting broad analyses the best approach would be to combine data from all available databases. This is effectively done automatically by the [Mycology Collections Portal](https://mycoportal.org) (MyCoPortal) web interface. This interface allows users to access data from a wide variety of fungaria and citizen science platforms and then automatically aggregate the data from these different sources into one data set. 
 
-```{r nice-fig, fig.cap='Here is a nice figure!', out.width='80%', fig.asp=.75, fig.align='center'}
-par(mar = c(4, 4, .1, .1))
-plot(pressure, type = 'b', pch = 19)
+While useful, MyCoPortal data does come with challenges. First, accessing data via the web interface can be a slow and inefficient process, especially if your analysis requires querying for multiple taxa, locations, years, etc. Second, the ability to find records with trait-relevant environmental metadata via the interface is extremely limited, considering that only one out of four metadata fields can be queried (i.e., "host") and complex regular expressions (regex) cannot be used. Third, many taxon names are misspelled or are outdated (i.e., no longer reflect current scientific consensus). Fourth, location names are also often misspelled. All of these issues, affect the efficiency and accuracy of trait analyses.
+
+To overcome the challenges associated with MyCoPortal data, we created the **fungarium** package. This package contains a suite of functions aimed at enabling efficient, accurate, and comprehensive analyses of ecological traits in fungi.
+
+Note that while **fungarium** was created for use with MyCoPortal data, many of the functions are theoretically applicable to any data set containing taxonomic, geographic, and environmental information.
+
+## Getting started
+
+### Installing fungarium
+
+```{r installation, include=TRUE, eval=FALSE, echo=TRUE}
+install.packages("devtools") #Install 'devtools' (if not already installed)
+devtools::install_github("hjsimpso/fungarium") #install fungarium package from github repository
 ```
 
-Reference a figure by its code chunk label with the `fig:` prefix, e.g., see Figure \@ref(fig:nice-fig). Similarly, you can reference tables generated from `knitr::kable()`, e.g., see Table \@ref(tab:nice-tab).
+### Installing Docker
 
-```{r nice-tab, tidy=FALSE}
-knitr::kable(
-  head(iris, 20), caption = 'Here is a nice table!',
-  booktabs = TRUE
-)
+Before using the `mycoportal_tab` function, [Docker](https://docs.docker.com/get-started/overview/) should be installed and running on your system. No other function in the **fungarium** package requires Docker, so if you do not wish to utilize `mycoportal_tab` you do not need to install Docker.
+
+Instructions for installing Docker (available for Linux platforms, macOS, and Windows 10): https://docs.docker.com/engine/install/
+
+To learn more about Docker and how it works, see: https://docs.docker.com/get-started/overview/. Note that you do not need to be fully familiar with every aspect of Docker to use `mycoportal_tab`. You simply need to install it and ensure that it is running.
+
+### Retrieving MyCoPortal data
+
+Fungal collection/observation data can be retrieved from the MyCoPortal using `mycoportal_tab` within R or by manually downloading data from the MyCoPortal web interface at https://mycoportal.org.
+
+#### mycoportal_tab
+
+If you have installed Docker, you can use `mycoportal_tab` within R to retrieve data sets from the MyCoPortal:
+
+```{r data_download, include=TRUE, eval=FALSE, echo=TRUE}
+#Load package
+library(fungarium) 
+
+#Query for all Pholiota records; download file into home directory
+data <- mycoportal_tab(path.expand("~"), "Pholiota",
+                            taxon_type="1", read_files=TRUE,
+                            messages=FALSE, rec_numb=FALSE)
+
+#Query for all Strophariaceae records; download file into home directory
+data <- mycoportal_tab(path.expand("~"), "Strophariaceae",
+                            taxon_type="2", read_files=TRUE,
+                            messages=FALSE, rec_numb=FALSE)
 ```
 
-You can write citations, too. For example, we are using the **bookdown** package [@R-bookdown] in this sample book, which was built on top of R Markdown and **knitr** [@xie2015].
+#### MyCoPortal web interface
+
+If you do not wish to use `mycoportal_tab` you can download MyCoPortal data sets manually from the web interface at https://mycoportal.org. You can enter the same query parameters (e.g., taxon, country, year, etc.) as those used in `mycoportal_tab`. When selecting download preferences, select "Tab Delimited" for File Format and "ISO-8859-1 (western)" for Character Set. Downloaded data sets can be imported into R via `read.delim` or `data.table::fread`.
+
+
+```{r include=FALSE}
+# automatically create a bib database for R packages
+knitr::write_bib(c(
+  .packages(), 'fungarium'
+), 'packages.bib')
+```

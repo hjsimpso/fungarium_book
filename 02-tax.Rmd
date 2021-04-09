@@ -1,0 +1,110 @@
+# Taxonomic analysis {#tax}
+
+## Update taxon names and clean up
+
+Some MyCoPortal records will have outdated or invalid taxonomy; therefore, all taxon names need to be either updated or confirmed using currently accepted taxonomic classification (e.g., [GBIF backbone taxonomy](https://www.gbif.org/dataset/d7dddbf4-2cf0-4f39-9b2a-bb099caae36c)) prior to trait analyses. In the example below, records not identified to the species level are removed from the data set. This helps avoid taxonomy uncertain issues, which are described in more detail by @fungarium2021.
+
+After updating taxonomy, some records may now be classified outside of the taxonomic group that was originally queried. These records need to be removed if your analysis is to focus on the queried taxonomic group only. 
+
+```{r taxon_name_update, include=TRUE, eval=FALSE, echo=TRUE}
+library(fungarium)
+
+#import sample dataset
+data(strophariaceae) #global Strophariaceae records
+
+#update names and classification
+data <- taxon_update(strophariaceae, species_only=TRUE) 
+
+#remove records no longer classified in Strophariaceae
+data <- data[data$new_family=="Strophariaceae",] 
+
+#remove records with taxon names that could not be updated or confirmed
+data <- data[data$new_name!="",]
+```
+
+Note that taxon name updating and filtering was done prior to the taxonomic, geographic, and temporal analyses done by @fungarium2021. This is not necessarily required for geographic and temporal analyses; however, you run the risk of including "bad taxa" (i.e. taxa that are not actually classified within your originally specified taxonomic group) in your analyses. Thus, it is recommended to update taxon names and filter before performing any downstream analyses.
+
+## Calculating trait enrichment factors
+
+To make quantitative trait comparisons between taxa, trait-relevant records are first identified using `find_trait` and then trait enrichment factors are calculated using `enrichment`. These enrichment factors correspond to the number of records associated with a certain trait divided by the number of total records for a given taxon. The following example investigates fire-association (i.e., association with fire-affected habitat, hosts, or substrates) as an ecological trait.
+
+```{r tax_enrich, include=TRUE, eval=FALSE, echo=TRUE}
+#string for finding fire-associated records
+string1 <- "(?i)charred|burn(t|ed)|scorched|fire.?(killed|damaged|scarred)|killed.by.fire"
+
+#string for removing records falsely identfied as fire-associated
+string2 <- "(?i)un.?burn(t|ed)"
+
+#filter out records that do not contain any environmental metadata (optional)
+data <- data[data$occurrenceRemarks!=""|data$host!=""|
+                   data$habitat!=""|data$substrate!="",]
+
+#find trait-relevant records
+trait_data <- find_trait(data, pos_string=string1, neg_string=string2)
+
+#get trait enrichment
+trait_enrichment <- enrichment(all_rec=data, trait_rec=trait_data, status_feed=FALSE)
+
+#filter taxa based on collector bias (optional)
+trait_enrichment <- trait_enrichment[trait_enrichment$max_bias<=0.75,]
+
+#filter taxa based on total number of records (optional)
+trait_enrichment <- trait_enrichment[trait_enrichment$freq>=5,]
+```
+
+Note that there are various optional filtering steps that may be done before and after trait searching and enrichment factor calculation, all of which have the potential to improve the accuracy of enrichment values. In the example above, records that did not contain any environmental metadata were removed prior to trait searching. This helps remove potential false negative records (i.e., records that are in fact associated with the trait of interest but are not identified as such), which negatively impact the enrichment factor accuracy. After trait searching and enrichment factor calculation, there a variety of output fields that can be used for data set filtering.
+
+The "freq" or "trait_freq" output fields correspond to the number of total records and the number of trait-relevant records, respectively, for each unique taxon. These can both be used to filter out taxa that have not been sampled thoroughly enough to calculate trustworthy enrichment values (enrichment values are listed under the "trait_ratio" output field; see `enrichment` documentation for more details about output fields). For example, a taxon with 50 total records will have a more trustworthy enrichment value than a taxon that has only 5 total records.
+
+The "max_bias" or "coll_groups" output fields correspond to the maximum proportion of records collected by one group of associated collectors and the total number of associated collector groups, respectively. These fields can be used to filter out taxa that have been collected with a high degree of bias, and, thus, may not have trustworthy enrichment values. For example, a taxon with a "max_bias" value of 0.25 will likely have a more trustworthy enrichment value than a taxon with a value of 0.85. See @fungarium2021 for more details about how enrichment values can be negatively impacted by collector bias.
+
+## Visualize trait enrichment factors
+
+After trait enrichment factors have been calculated for each species, these values can been visualized within a cladogram using `trait_clado`. This function generates a cladogram based on the taxonomic classification of each species (up-to-date taxonomic classification is given in the output of `taxon_update`). Cladogram tip color corresponds to the enrichment value of each species, whereas node color corresponds to the enrichment value of each higher-level taxon in the cladogram. Other tree annotation options are available. See `trait_clado` documentation for more details.
+
+```{r circle_clado, fig.cap='Circle cladogram showing fire-association enrichment among Strophariaceae species', out.width='80%', fig.asp=.75, fig.align='center', eval=FALSE}
+#make circle cladogram
+library(ggtree)
+library(ggplot2)
+
+trait_clado(data=trait_enrichment, trait_col="trait_ratio", continuous=TRUE,
+                    ladderize=TRUE, layout="circular", size=1,
+                    formula = ~new_order/new_family/new_genus/new_species)+
+  geom_tiplab2(color = "black", hjust = 0, offset = 0.1,
+               size = 1.5, fontface = "italic") + #add species labels
+  geom_tippoint(shape=20, aes(color=trait_ratio, size=trait_freq))+#add tree tips
+  ggtitle("Strophariaceae (US records): fire-association")+
+  scale_color_gradientn(colours= c("cyan", "blue", "purple", "red", "orange"),
+                        name = "Fire-associated records enrichment",
+                        limits = c(0, max(trait_enrichment$trait_ratio)+
+                                   (0.01*max(trait_enrichment$trait_ratio))),
+                        guide = guide_colourbar(label.vjust = 0.6,
+                                                label.theme = element_text(size = 10,
+                                                                           colour = "black",
+                                                                           angle = 0),
+                                                title.position = "top",
+                                                nbin=100,
+                                                draw.ulim = FALSE,
+                                                draw.llim = FALSE,
+                                                barwidth = 15,
+                                                barheight = 0.5)
+  )+
+  scale_size(name = "Fire-associated records",
+             guide = guide_legend(keywidth = 2,
+                                  keyheight = 1,
+                                  label.position = "bottom",
+                                  label.vjust = 0.6,
+                                  label.theme = element_text(size = 10,
+                                                             colour = "black",
+                                                             angle = 0),
+                                  title.position = "top")) +
+  theme(plot.margin=margin(0,0,0,0),
+        legend.title = element_text(size = 10, margin = margin(0,0,0,0)),
+        legend.title.align = 0.5,
+        legend.position = "bottom",
+        legend.justification = "center",
+        legend.margin = margin(0,0,0,0),
+        plot.title = element_text(hjust = 0.5, margin=margin(0,0,0,0)))+
+  xlim(-1, 3.6)#move root away from center; can help improve appearance of circular plot
+```
+

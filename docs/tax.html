@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 2 Taxonomic analysis | fungarium: Enabling the use of fungaria collections data for comprehensive trait analyses in R</title>
+  <meta name="description" content="A guide to using fungarium for comprehensive analyses of ecological traits in fungi." />
+  <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 2 Taxonomic analysis | fungarium: Enabling the use of fungaria collections data for comprehensive trait analyses in R" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="A guide to using fungarium for comprehensive analyses of ecological traits in fungi." />
+  <meta name="github-repo" content="hjsimpso/fungarium" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 2 Taxonomic analysis | fungarium: Enabling the use of fungaria collections data for comprehensive trait analyses in R" />
+  
+  <meta name="twitter:description" content="A guide to using fungarium for comprehensive analyses of ecological traits in fungi." />
+  
+
+<meta name="author" content="Hunter J. Simpson" />
+
+
+<meta name="date" content="2021-04-10" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+<link rel="prev" href="intro.html"/>
+<link rel="next" href="geo.html"/>
+<script src="libs/header-attrs-2.7/header-attrs.js"></script>
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">fungarium</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a></li>
+<li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> Introduction</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="intro.html"><a href="intro.html#motivation"><i class="fa fa-check"></i><b>1.1</b> Motivation</a></li>
+<li class="chapter" data-level="1.2" data-path="intro.html"><a href="intro.html#getting-started"><i class="fa fa-check"></i><b>1.2</b> Getting started</a>
+<ul>
+<li class="chapter" data-level="1.2.1" data-path="intro.html"><a href="intro.html#installing-fungarium"><i class="fa fa-check"></i><b>1.2.1</b> Installing fungarium</a></li>
+<li class="chapter" data-level="1.2.2" data-path="intro.html"><a href="intro.html#installing-docker"><i class="fa fa-check"></i><b>1.2.2</b> Installing Docker</a></li>
+<li class="chapter" data-level="1.2.3" data-path="intro.html"><a href="intro.html#retrieving-mycoportal-data"><i class="fa fa-check"></i><b>1.2.3</b> Retrieving MyCoPortal data</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="tax.html"><a href="tax.html"><i class="fa fa-check"></i><b>2</b> Taxonomic analysis</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="tax.html"><a href="tax.html#update-taxon-names-and-clean-up"><i class="fa fa-check"></i><b>2.1</b> Update taxon names and clean up</a></li>
+<li class="chapter" data-level="2.2" data-path="tax.html"><a href="tax.html#calculating-trait-enrichment-factors"><i class="fa fa-check"></i><b>2.2</b> Calculating trait enrichment factors</a></li>
+<li class="chapter" data-level="2.3" data-path="tax.html"><a href="tax.html#visualize-trait-enrichment-factors"><i class="fa fa-check"></i><b>2.3</b> Visualize trait enrichment factors</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="geo.html"><a href="geo.html"><i class="fa fa-check"></i><b>3</b> Geographic analysis</a></li>
+<li class="chapter" data-level="4" data-path="tem.html"><a href="tem.html"><i class="fa fa-check"></i><b>4</b> Temporal analysis</a></li>
+<li class="chapter" data-level="5" data-path="conc.html"><a href="conc.html"><i class="fa fa-check"></i><b>5</b> Final Words</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">fungarium: Enabling the use of fungaria collections data for comprehensive trait analyses in R</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="tax" class="section level1" number="2">
+<h1><span class="header-section-number">Chapter 2</span> Taxonomic analysis</h1>
+<div id="update-taxon-names-and-clean-up" class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span> Update taxon names and clean up</h2>
+<p>Some MyCoPortal records will have outdated or invalid taxonomy; therefore, all taxon names need to be either updated or confirmed using currently accepted taxonomic classification (e.g., <a href="https://www.gbif.org/dataset/d7dddbf4-2cf0-4f39-9b2a-bb099caae36c">GBIF backbone taxonomy</a>) prior to trait analyses. In the example below, records not identified to the species level are removed from the data set. This helps avoid taxonomy uncertain issues, which are described in more detail by <span class="citation"><a href="references.html#ref-fungarium2021" role="doc-biblioref">Simpson and Schilling</a> (<a href="references.html#ref-fungarium2021" role="doc-biblioref">2021</a>)</span>.</p>
+<p>After updating taxonomy, some records may now be classified outside of the taxonomic group that was originally queried. These records need to be removed if your analysis is to focus on the queried taxonomic group only.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="tax.html#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(fungarium)</span>
+<span id="cb1-2"><a href="tax.html#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="tax.html#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#import sample dataset</span></span>
+<span id="cb1-4"><a href="tax.html#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(strophariaceae) <span class="co">#global Strophariaceae records</span></span>
+<span id="cb1-5"><a href="tax.html#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="tax.html#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#update names and classification</span></span>
+<span id="cb1-7"><a href="tax.html#cb1-7" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">taxon_update</span>(strophariaceae, <span class="at">species_only=</span><span class="cn">TRUE</span>, <span class="at">show_status=</span><span class="cn">FALSE</span>) </span>
+<span id="cb1-8"><a href="tax.html#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="tax.html#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#remove records no longer classified in Strophariaceae</span></span>
+<span id="cb1-10"><a href="tax.html#cb1-10" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data[data<span class="sc">$</span>new_family<span class="sc">==</span><span class="st">&quot;Strophariaceae&quot;</span>,] </span>
+<span id="cb1-11"><a href="tax.html#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="tax.html#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">#remove records with taxon names that could not be updated or confirmed</span></span>
+<span id="cb1-13"><a href="tax.html#cb1-13" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data[data<span class="sc">$</span>new_name<span class="sc">!=</span><span class="st">&quot;&quot;</span>,]</span></code></pre></div>
+<p>Note that taxon name updating and filtering was done prior to the taxonomic, geographic, and temporal analyses done by <span class="citation"><a href="references.html#ref-fungarium2021" role="doc-biblioref">Simpson and Schilling</a> (<a href="references.html#ref-fungarium2021" role="doc-biblioref">2021</a>)</span>. This is not necessarily required for geographic and temporal analyses; however, you run the risk of including “bad taxa” (i.e. taxa that are not actually classified within your originally specified taxonomic group) in your analyses. Thus, it is recommended to update taxon names and filter before performing any downstream analyses.</p>
+</div>
+<div id="calculating-trait-enrichment-factors" class="section level2" number="2.2">
+<h2><span class="header-section-number">2.2</span> Calculating trait enrichment factors</h2>
+<p>To make quantitative trait comparisons between taxa, trait-relevant records are first identified using <code>find_trait</code> and then trait enrichment factors are calculated using <code>enrichment</code>. These enrichment factors correspond to the number of records associated with a certain trait divided by the number of total records for a given taxon. The following example investigates fire-association (i.e., association with fire-affected habitat, hosts, or substrates) as an ecological trait.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="tax.html#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#string for finding fire-associated records</span></span>
+<span id="cb2-2"><a href="tax.html#cb2-2" aria-hidden="true" tabindex="-1"></a>string1 <span class="ot">&lt;-</span> <span class="st">&quot;(?i)charred|burn(t|ed)|scorched|fire.?(killed|damaged|scarred)|killed.by.fire&quot;</span></span>
+<span id="cb2-3"><a href="tax.html#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="tax.html#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#string for removing records falsely identfied as fire-associated</span></span>
+<span id="cb2-5"><a href="tax.html#cb2-5" aria-hidden="true" tabindex="-1"></a>string2 <span class="ot">&lt;-</span> <span class="st">&quot;(?i)un.?burn(t|ed)&quot;</span></span>
+<span id="cb2-6"><a href="tax.html#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="tax.html#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#filter out records that do not contain any environmental metadata (optional)</span></span>
+<span id="cb2-8"><a href="tax.html#cb2-8" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data[data<span class="sc">$</span>occurrenceRemarks<span class="sc">!=</span><span class="st">&quot;&quot;</span><span class="sc">|</span>data<span class="sc">$</span>host<span class="sc">!=</span><span class="st">&quot;&quot;</span><span class="sc">|</span></span>
+<span id="cb2-9"><a href="tax.html#cb2-9" aria-hidden="true" tabindex="-1"></a>                   data<span class="sc">$</span>habitat<span class="sc">!=</span><span class="st">&quot;&quot;</span><span class="sc">|</span>data<span class="sc">$</span>substrate<span class="sc">!=</span><span class="st">&quot;&quot;</span>,]</span>
+<span id="cb2-10"><a href="tax.html#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="tax.html#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">#find trait-relevant records</span></span>
+<span id="cb2-12"><a href="tax.html#cb2-12" aria-hidden="true" tabindex="-1"></a>trait_data <span class="ot">&lt;-</span> <span class="fu">find_trait</span>(data, <span class="at">pos_string=</span>string1, <span class="at">neg_string=</span>string2)</span>
+<span id="cb2-13"><a href="tax.html#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="tax.html#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">#get trait enrichment</span></span>
+<span id="cb2-15"><a href="tax.html#cb2-15" aria-hidden="true" tabindex="-1"></a>trait_enrichment <span class="ot">&lt;-</span> <span class="fu">enrichment</span>(<span class="at">all_rec=</span>data, <span class="at">trait_rec=</span>trait_data, <span class="at">status_feed=</span><span class="cn">FALSE</span>)</span></code></pre></div>
+<pre><code>## Coercing input data to data.table.
+## Coercing input data to data.table.</code></pre>
+<pre><code>## All records bias analysis. 38% of elements processed. 
+All records bias analysis. 39% of elements processed. 
+All records bias analysis. 39% of elements processed. 
+All records bias analysis. 40% of elements processed. 
+All records bias analysis. 40% of elements processed. 
+All records bias analysis. 41% of elements processed. 
+All records bias analysis. 41% of elements processed. 
+All records bias analysis. 42% of elements processed. 
+All records bias analysis. 42% of elements processed. 
+All records bias analysis. 43% of elements processed. 
+All records bias analysis. 43% of elements processed. 
+All records bias analysis. 44% of elements processed. 
+All records bias analysis. 44% of elements processed. 
+All records bias analysis. 45% of elements processed. 
+All records bias analysis. 45% of elements processed. 
+All records bias analysis. 46% of elements processed. 
+All records bias analysis. 46% of elements processed. 
+All records bias analysis. 47% of elements processed. 
+All records bias analysis. 47% of elements processed. 
+All records bias analysis. 48% of elements processed. 
+All records bias analysis. 48% of elements processed. 
+All records bias analysis. 49% of elements processed. 
+All records bias analysis. 49% of elements processed. 
+All records bias analysis. 50% of elements processed. 
+All records bias analysis. 51% of elements processed. 
+All records bias analysis. 51% of elements processed. 
+All records bias analysis. 52% of elements processed. 
+All records bias analysis. 52% of elements processed. 
+All records bias analysis. 53% of elements processed. 
+All records bias analysis. 53% of elements processed. 
+All records bias analysis. 54% of elements processed. 
+All records bias analysis. 54% of elements processed. 
+All records bias analysis. 55% of elements processed. 
+All records bias analysis. 55% of elements processed. 
+All records bias analysis. 56% of elements processed. 
+All records bias analysis. 56% of elements processed. 
+All records bias analysis. 57% of elements processed. 
+All records bias analysis. 57% of elements processed. 
+All records bias analysis. 58% of elements processed. 
+All records bias analysis. 58% of elements processed. 
+All records bias analysis. 59% of elements processed. 
+All records bias analysis. 59% of elements processed. 
+All records bias analysis. 60% of elements processed. 
+All records bias analysis. 60% of elements processed. 
+All records bias analysis. 61% of elements processed. 
+All records bias analysis. 61% of elements processed. 
+All records bias analysis. 62% of elements processed. 
+All records bias analysis. 62% of elements processed. 
+All records bias analysis. 63% of elements processed. 
+All records bias analysis. 63% of elements processed. 
+All records bias analysis. 64% of elements processed. 
+All records bias analysis. 64% of elements processed. 
+All records bias analysis. 65% of elements processed. 
+All records bias analysis. 65% of elements processed. 
+All records bias analysis. 66% of elements processed. 
+All records bias analysis. 66% of elements processed. 
+All records bias analysis. 67% of elements processed. 
+All records bias analysis. 68% of elements processed. 
+All records bias analysis. 68% of elements processed. 
+All records bias analysis. 69% of elements processed. 
+All records bias analysis. 69% of elements processed. 
+All records bias analysis. 70% of elements processed. 
+All records bias analysis. 70% of elements processed. 
+All records bias analysis. 71% of elements processed. 
+All records bias analysis. 71% of elements processed. 
+All records bias analysis. 72% of elements processed. 
+All records bias analysis. 72% of elements processed. 
+All records bias analysis. 73% of elements processed. 
+All records bias analysis. 73% of elements processed. 
+All records bias analysis. 74% of elements processed. 
+All records bias analysis. 74% of elements processed. 
+All records bias analysis. 75% of elements processed. 
+All records bias analysis. 75% of elements processed. 
+All records bias analysis. 76% of elements processed. 
+All records bias analysis. 76% of elements processed. 
+All records bias analysis. 77% of elements processed. 
+All records bias analysis. 77% of elements processed. 
+All records bias analysis. 78% of elements processed. 
+All records bias analysis. 78% of elements processed. 
+All records bias analysis. 79% of elements processed. 
+All records bias analysis. 79% of elements processed. 
+All records bias analysis. 80% of elements processed. 
+All records bias analysis. 80% of elements processed. 
+All records bias analysis. 81% of elements processed. 
+All records bias analysis. 81% of elements processed. 
+All records bias analysis. 82% of elements processed. 
+All records bias analysis. 82% of elements processed. 
+All records bias analysis. 83% of elements processed. 
+All records bias analysis. 84% of elements processed. 
+All records bias analysis. 84% of elements processed. 
+All records bias analysis. 85% of elements processed. 
+All records bias analysis. 85% of elements processed. 
+All records bias analysis. 86% of elements processed. 
+All records bias analysis. 86% of elements processed. 
+All records bias analysis. 87% of elements processed. 
+All records bias analysis. 87% of elements processed. 
+All records bias analysis. 88% of elements processed. 
+All records bias analysis. 88% of elements processed. 
+All records bias analysis. 89% of elements processed. 
+All records bias analysis. 89% of elements processed. 
+All records bias analysis. 90% of elements processed. 
+All records bias analysis. 90% of elements processed. 
+All records bias analysis. 91% of elements processed. 
+All records bias analysis. 91% of elements processed. 
+All records bias analysis. 92% of elements processed. 
+All records bias analysis. 92% of elements processed. 
+All records bias analysis. 93% of elements processed. 
+All records bias analysis. 93% of elements processed. 
+All records bias analysis. 94% of elements processed. 
+All records bias analysis. 94% of elements processed. 
+All records bias analysis. 95% of elements processed. 
+All records bias analysis. 95% of elements processed. 
+All records bias analysis. 96% of elements processed. 
+All records bias analysis. 96% of elements processed. 
+All records bias analysis. 97% of elements processed. 
+All records bias analysis. 97% of elements processed. 
+All records bias analysis. 98% of elements processed. 
+All records bias analysis. 98% of elements processed. 
+All records bias analysis. 99% of elements processed. 
+All records bias analysis. 99% of elements processed. 
+All records bias analysis. 100% of elements processed. 
+Trait records bias analysis. 98% of elements processed. 
+Trait records bias analysis. 99% of elements processed. 
+Trait records bias analysis. 99% of elements processed. 
+Trait records bias analysis. 100% of elements processed. </code></pre>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="tax.html#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#filter taxa based on collector bias (optional)</span></span>
+<span id="cb5-2"><a href="tax.html#cb5-2" aria-hidden="true" tabindex="-1"></a>trait_enrichment <span class="ot">&lt;-</span> trait_enrichment[trait_enrichment<span class="sc">$</span>max_bias<span class="sc">&lt;=</span><span class="fl">0.75</span>,]</span>
+<span id="cb5-3"><a href="tax.html#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="tax.html#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">#filter taxa based on total number of records (optional)</span></span>
+<span id="cb5-5"><a href="tax.html#cb5-5" aria-hidden="true" tabindex="-1"></a>trait_enrichment <span class="ot">&lt;-</span> trait_enrichment[trait_enrichment<span class="sc">$</span>freq<span class="sc">&gt;=</span><span class="dv">5</span>,]</span></code></pre></div>
+<p>Note that there are various optional filtering steps that may be done before and after trait searching and enrichment factor calculation, all of which have the potential to improve the accuracy of enrichment values. In the example above, records that did not contain any environmental metadata were removed prior to trait searching. This helps remove potential false negative records (i.e., records that are in fact associated with the trait of interest but are not identified as such), which negatively impact the enrichment factor accuracy. After trait searching and enrichment factor calculation, there a variety of output fields that can be used for data set filtering.</p>
+<p>The “freq” or “trait_freq” output fields correspond to the number of total records and the number of trait-relevant records, respectively, for each unique taxon. These can both be used to filter out taxa that have not been sampled thoroughly enough to calculate trustworthy enrichment values (enrichment values are listed under the “trait_ratio” output field; see <code>enrichment</code> documentation for more details about output fields). For example, a taxon with 50 total records will have a more trustworthy enrichment value than a taxon that has only 5 total records.</p>
+<p>The “max_bias” or “coll_groups” output fields correspond to the maximum proportion of records collected by one group of associated collectors and the total number of associated collector groups, respectively. These fields can be used to filter out taxa that have been collected with a high degree of bias, and, thus, may not have trustworthy enrichment values. For example, a taxon with a “max_bias” value of 0.25 will likely have a more trustworthy enrichment value than a taxon with a value of 0.85. See <span class="citation"><a href="references.html#ref-fungarium2021" role="doc-biblioref">Simpson and Schilling</a> (<a href="references.html#ref-fungarium2021" role="doc-biblioref">2021</a>)</span> for more details about how enrichment values can be negatively impacted by collector bias.</p>
+</div>
+<div id="visualize-trait-enrichment-factors" class="section level2" number="2.3">
+<h2><span class="header-section-number">2.3</span> Visualize trait enrichment factors</h2>
+<p>After trait enrichment factors have been calculated for each species, these values can been visualized within a cladogram using <code>trait_clado</code>. This function generates a cladogram based on the taxonomic classification of each species (up-to-date taxonomic classification is given in the output of <code>taxon_update</code>). Cladogram tip color corresponds to the enrichment value of each species, whereas node color corresponds to the enrichment value of each higher-level taxon in the cladogram. Other tree annotation options are available. See <code>trait_clado</code> documentation for more details.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="tax.html#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#make circle cladogram</span></span>
+<span id="cb6-2"><a href="tax.html#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggtree)</span></code></pre></div>
+<pre><code>## Registered S3 method overwritten by &#39;treeio&#39;:
+##   method     from
+##   root.phylo ape</code></pre>
+<pre><code>## ggtree v2.2.2  For help: https://yulab-smu.github.io/treedata-book/
+## 
+## If you use ggtree in published research, please cite the most appropriate paper(s):
+## 
+## [36m-[39m Guangchuang Yu. Using ggtree to visualize data on tree-like structures. Current Protocols in Bioinformatics, 2020, 69:e96. doi:10.1002/cpbi.96
+## [36m-[39m Guangchuang Yu, Tommy Tsan-Yuk Lam, Huachen Zhu, Yi Guan. Two methods for mapping and visualizing associated data on phylogeny using ggtree. Molecular Biology and Evolution 2018, 35(12):3041-3043. doi:10.1093/molbev/msy194
+## [36m-[39m Guangchuang Yu, David Smith, Huachen Zhu, Yi Guan, Tommy Tsan-Yuk Lam. ggtree: an R package for visualization and annotation of phylogenetic trees with their covariates and other associated data. Methods in Ecology and Evolution 2017, 8(1):28-36. doi:10.1111/2041-210X.12628</code></pre>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="tax.html#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code></pre></div>
+<pre><code>## Warning: package &#39;ggplot2&#39; was built under R version 4.0.4</code></pre>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="tax.html#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">trait_clado</span>(<span class="at">data=</span>trait_enrichment, <span class="at">trait_col=</span><span class="st">&quot;trait_ratio&quot;</span>, <span class="at">continuous=</span><span class="cn">TRUE</span>,</span>
+<span id="cb11-2"><a href="tax.html#cb11-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">ladderize=</span><span class="cn">TRUE</span>, <span class="at">layout=</span><span class="st">&quot;circular&quot;</span>, <span class="at">size=</span><span class="dv">1</span>,</span>
+<span id="cb11-3"><a href="tax.html#cb11-3" aria-hidden="true" tabindex="-1"></a>                    <span class="at">formula =</span> <span class="sc">~</span>new_family<span class="sc">/</span>new_genus<span class="sc">/</span>new_species)<span class="sc">+</span></span>
+<span id="cb11-4"><a href="tax.html#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tiplab2</span>(<span class="at">color =</span> <span class="st">&quot;black&quot;</span>, <span class="at">hjust =</span> <span class="dv">0</span>, <span class="at">offset =</span> <span class="fl">0.1</span>,</span>
+<span id="cb11-5"><a href="tax.html#cb11-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">size =</span> <span class="fl">1.5</span>, <span class="at">fontface =</span> <span class="st">&quot;italic&quot;</span>) <span class="sc">+</span> <span class="co">#add species labels</span></span>
+<span id="cb11-6"><a href="tax.html#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tippoint</span>(<span class="at">shape=</span><span class="dv">20</span>, <span class="fu">aes</span>(<span class="at">color=</span>trait_ratio, <span class="at">size=</span>trait_freq))<span class="sc">+</span><span class="co">#add tree tips</span></span>
+<span id="cb11-7"><a href="tax.html#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_gradientn</span>(<span class="at">colours=</span> <span class="fu">c</span>(<span class="st">&quot;cyan&quot;</span>, <span class="st">&quot;blue&quot;</span>, <span class="st">&quot;purple&quot;</span>, <span class="st">&quot;red&quot;</span>, <span class="st">&quot;orange&quot;</span>),</span>
+<span id="cb11-8"><a href="tax.html#cb11-8" aria-hidden="true" tabindex="-1"></a>                        <span class="at">name =</span> <span class="st">&quot;Fire-associated records enrichment&quot;</span>,</span>
+<span id="cb11-9"><a href="tax.html#cb11-9" aria-hidden="true" tabindex="-1"></a>                        <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">max</span>(trait_enrichment<span class="sc">$</span>trait_ratio)<span class="sc">+</span></span>
+<span id="cb11-10"><a href="tax.html#cb11-10" aria-hidden="true" tabindex="-1"></a>                                   (<span class="fl">0.01</span><span class="sc">*</span><span class="fu">max</span>(trait_enrichment<span class="sc">$</span>trait_ratio))),</span>
+<span id="cb11-11"><a href="tax.html#cb11-11" aria-hidden="true" tabindex="-1"></a>                        <span class="at">guide =</span> <span class="fu">guide_colourbar</span>(<span class="at">label.vjust =</span> <span class="fl">0.6</span>,</span>
+<span id="cb11-12"><a href="tax.html#cb11-12" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">label.theme =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>,</span>
+<span id="cb11-13"><a href="tax.html#cb11-13" aria-hidden="true" tabindex="-1"></a>                                                                           <span class="at">colour =</span> <span class="st">&quot;black&quot;</span>,</span>
+<span id="cb11-14"><a href="tax.html#cb11-14" aria-hidden="true" tabindex="-1"></a>                                                                           <span class="at">angle =</span> <span class="dv">0</span>),</span>
+<span id="cb11-15"><a href="tax.html#cb11-15" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">title.position =</span> <span class="st">&quot;top&quot;</span>,</span>
+<span id="cb11-16"><a href="tax.html#cb11-16" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">nbin=</span><span class="dv">100</span>,</span>
+<span id="cb11-17"><a href="tax.html#cb11-17" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">draw.ulim =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb11-18"><a href="tax.html#cb11-18" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">draw.llim =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb11-19"><a href="tax.html#cb11-19" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">barwidth =</span> <span class="dv">15</span>,</span>
+<span id="cb11-20"><a href="tax.html#cb11-20" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">barheight =</span> <span class="fl">0.5</span>)</span>
+<span id="cb11-21"><a href="tax.html#cb11-21" aria-hidden="true" tabindex="-1"></a>  )<span class="sc">+</span></span>
+<span id="cb11-22"><a href="tax.html#cb11-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_size</span>(<span class="at">name =</span> <span class="st">&quot;Fire-associated records&quot;</span>,</span>
+<span id="cb11-23"><a href="tax.html#cb11-23" aria-hidden="true" tabindex="-1"></a>             <span class="at">guide =</span> <span class="fu">guide_legend</span>(<span class="at">keywidth =</span> <span class="dv">2</span>,</span>
+<span id="cb11-24"><a href="tax.html#cb11-24" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">keyheight =</span> <span class="dv">1</span>,</span>
+<span id="cb11-25"><a href="tax.html#cb11-25" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">label.position =</span> <span class="st">&quot;bottom&quot;</span>,</span>
+<span id="cb11-26"><a href="tax.html#cb11-26" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">label.vjust =</span> <span class="fl">0.6</span>,</span>
+<span id="cb11-27"><a href="tax.html#cb11-27" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">label.theme =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>,</span>
+<span id="cb11-28"><a href="tax.html#cb11-28" aria-hidden="true" tabindex="-1"></a>                                                             <span class="at">colour =</span> <span class="st">&quot;black&quot;</span>,</span>
+<span id="cb11-29"><a href="tax.html#cb11-29" aria-hidden="true" tabindex="-1"></a>                                                             <span class="at">angle =</span> <span class="dv">0</span>),</span>
+<span id="cb11-30"><a href="tax.html#cb11-30" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">title.position =</span> <span class="st">&quot;top&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb11-31"><a href="tax.html#cb11-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">plot.margin=</span><span class="fu">margin</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>),</span>
+<span id="cb11-32"><a href="tax.html#cb11-32" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>, <span class="at">margin =</span> <span class="fu">margin</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>)),</span>
+<span id="cb11-33"><a href="tax.html#cb11-33" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.title.align =</span> <span class="fl">0.5</span>,</span>
+<span id="cb11-34"><a href="tax.html#cb11-34" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>,</span>
+<span id="cb11-35"><a href="tax.html#cb11-35" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.justification =</span> <span class="st">&quot;center&quot;</span>,</span>
+<span id="cb11-36"><a href="tax.html#cb11-36" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.margin =</span> <span class="fu">margin</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>),</span>
+<span id="cb11-37"><a href="tax.html#cb11-37" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">margin=</span><span class="fu">margin</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>)))</span></code></pre></div>
+<div class="figure" style="text-align: center">
+<img src="bookdown-demo_files/figure-html/circle_clado-1.png" alt="Circle cladogram showing fire-association enrichment among Strophariaceae species" width="80%" />
+<p class="caption">
+(#fig:circle_clado)Circle cladogram showing fire-association enrichment among Strophariaceae species
+</p>
+</div>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="intro.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="geo.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": true,
+"facebook": false,
+"twitter": false,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"all": null
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": null,
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["bookdown-demo.pdf", "bookdown-demo.epub"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>

@@ -6,14 +6,14 @@ Some MyCoPortal records will have outdated or invalid taxonomy; therefore, all t
 
 After updating taxonomy, some records may now be classified outside of the taxonomic group that was originally queried. These records need to be removed if your analysis is to focus on the queried taxonomic group only. 
 
-```{r taxon_name_update, include=TRUE, eval=FALSE, echo=TRUE}
+```{r taxon_name_update, include=TRUE, eval=TRUE, echo=TRUE}
 library(fungarium)
 
 #import sample dataset
 data(strophariaceae) #global Strophariaceae records
 
 #update names and classification
-data <- taxon_update(strophariaceae, species_only=TRUE) 
+data <- taxon_update(strophariaceae, species_only=TRUE, show_status=FALSE) 
 
 #remove records no longer classified in Strophariaceae
 data <- data[data$new_family=="Strophariaceae",] 
@@ -28,7 +28,7 @@ Note that taxon name updating and filtering was done prior to the taxonomic, geo
 
 To make quantitative trait comparisons between taxa, trait-relevant records are first identified using `find_trait` and then trait enrichment factors are calculated using `enrichment`. These enrichment factors correspond to the number of records associated with a certain trait divided by the number of total records for a given taxon. The following example investigates fire-association (i.e., association with fire-affected habitat, hosts, or substrates) as an ecological trait.
 
-```{r tax_enrich, include=TRUE, eval=FALSE, echo=TRUE}
+```{r tax_enrich, include=TRUE, eval=TRUE, echo=TRUE}
 #string for finding fire-associated records
 string1 <- "(?i)charred|burn(t|ed)|scorched|fire.?(killed|damaged|scarred)|killed.by.fire"
 
@@ -62,7 +62,7 @@ The "max_bias" or "coll_groups" output fields correspond to the maximum proporti
 
 After trait enrichment factors have been calculated for each species, these values can been visualized within a cladogram using `trait_clado`. This function generates a cladogram based on the taxonomic classification of each species (up-to-date taxonomic classification is given in the output of `taxon_update`). Cladogram tip color corresponds to the enrichment value of each species, whereas node color corresponds to the enrichment value of each higher-level taxon in the cladogram. Other tree annotation options are available. See `trait_clado` documentation for more details.
 
-```{r circle_clado, fig.cap='Circle cladogram showing fire-association enrichment among Strophariaceae species', out.width='80%', fig.asp=.75, fig.align='center', eval=FALSE}
+```{r circle_clado, fig.cap='Circle cladogram showing fire-association enrichment among Strophariaceae species', out.width='80%', fig.asp=.75, fig.align='center', eval=TRUE}
 #make circle cladogram
 library(ggtree)
 library(ggplot2)

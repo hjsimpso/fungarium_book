@@ -1,0 +1,15 @@
+intro
+motivation
+getting-started
+installing-fungarium
+installing-docker
+retrieving-mycoportal-data
+mycoportal_tab
+mycoportal-web-interface
+tax
+update-taxon-names-and-clean-up
+calculating-trait-enrichment-factors
+visualize-trait-enrichment-factors
+geo
+tem
+conc

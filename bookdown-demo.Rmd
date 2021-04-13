@@ -1,0 +1,313 @@
+--- 
+title: "fungarium: Enabling the use of fungaria collections data for comprehensive trait analyses in R"
+author: "Hunter J. Simpson"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+output: bookdown::gitbook
+documentclass: book
+bibliography: [book.bib, packages.bib]
+biblio-style: apalike
+link-citations: yes
+github-repo: hjsimpso/fungarium
+favicon: favicon.ico
+description: "A guide to using fungarium for comprehensive analyses of ecological traits in fungi."
+---
+# Preface {-}
+
+This book provides detailed guidance on how to use the R package [**fungarium**](https://www.github.com/hjsimpso/fungarium) for comprehensive analyses of ecological traits in fungi. These methods were first outlined by @fungarium2021, who used fire-association as an example trait. To maintain consistency, fire-association is used as an example trait in this book as well.
+
+**Note**: Book is under active development, so please excuse any typos, missing details, or incomplete sections.
+
+<!--chapter:end:index.Rmd-->
+
+# Introduction {#intro}
+
+## Motivation
+
+Fungaria collections and citizen science observations (e.g.,[iNaturalist](https://www.inaturalist.org), [MushroomObserver](https://mushroomobserver.org)) typically contain taxonomic, geographic, and temporal information for each fungal specimen. Additionally, these records also often contain trait-relevant metadata about the host, habitat, or substrate associated with the collected or observed specimens; thus, these records are well-suited for comprehensive investigations into taxonomic, geographic, and temporal patterns of ecological traits. The first step in pursuing these investigations is accessing data and generating a data set. Citizen science platforms and many fungaria have online interfaces for downloading data from their respective databases. This is useful if you are only interested in the specimen records from one particular database; however, if you are interested in maximizing the size of your data set and conducting broad analyses the best approach would be to combine data from all available databases. This is effectively done automatically by the [Mycology Collections Portal](https://mycoportal.org) (MyCoPortal) web interface. This interface allows users to access data from a wide variety of fungaria and citizen science platforms and then automatically aggregate the data from these different sources into one data set. 
+
+While useful, MyCoPortal data does come with challenges. First, accessing data via the web interface can be a slow and inefficient process, especially if your analysis requires querying for multiple taxa, locations, years, etc. Second, the ability to find records with trait-relevant environmental metadata via the interface is extremely limited, considering that only one out of four metadata fields can be queried (i.e., "host") and complex regular expressions (regex) cannot be used. Third, many taxon names are misspelled or are outdated (i.e., no longer reflect current scientific consensus). Fourth, location names are also often misspelled. All of these issues, affect the efficiency and accuracy of trait analyses.
+
+To overcome the challenges associated with MyCoPortal data, we created the **fungarium** package. This package contains a suite of functions aimed at enabling efficient, accurate, and comprehensive analyses of ecological traits in fungi.
+
+Note that while **fungarium** was created for use with MyCoPortal data, many of the functions are theoretically applicable to any data set containing taxonomic, geographic, and environmental information.
+
+## Getting started
+
+### Installing fungarium
+
+```{r installation, include=TRUE, eval=FALSE, echo=TRUE}
+install.packages("devtools") #Install 'devtools' (if not already installed)
+devtools::install_github("hjsimpso/fungarium") #install fungarium package from github repository
+```
+
+### Installing Docker
+
+Before using the `mycoportal_tab` function, [Docker](https://docs.docker.com/get-started/overview/) should be installed and running on your system. No other function in the **fungarium** package requires Docker, so if you do not wish to utilize `mycoportal_tab` you do not need to install Docker.
+
+Instructions for installing Docker (available for Linux platforms, macOS, and Windows 10): https://docs.docker.com/engine/install/
+
+To learn more about Docker and how it works, see: https://docs.docker.com/get-started/overview/. Note that you do not need to be fully familiar with every aspect of Docker to use `mycoportal_tab`. You simply need to install it and ensure that it is running.
+
+### Retrieving MyCoPortal data
+
+Fungal collection/observation data can be retrieved from the MyCoPortal using `mycoportal_tab` within R or by manually downloading data from the MyCoPortal web interface at https://mycoportal.org.
+
+#### mycoportal_tab
+
+If you have installed Docker, you can use `mycoportal_tab` within R to retrieve data sets from the MyCoPortal:
+
+```{r data_download, include=TRUE, eval=FALSE, echo=TRUE}
+#Load package
+library(fungarium) 
+
+#Query for all Pholiota records; download file into home directory
+data <- mycoportal_tab(path.expand("~"), "Pholiota",
+                            taxon_type="1", read_files=TRUE,
+                            messages=FALSE, rec_numb=FALSE)
+
+#Query for all Strophariaceae records; download file into home directory
+data <- mycoportal_tab(path.expand("~"), "Strophariaceae",
+                            taxon_type="2", read_files=TRUE,
+                            messages=FALSE, rec_numb=FALSE)
+```
+
+#### MyCoPortal web interface
+
+If you do not wish to use `mycoportal_tab` you can download MyCoPortal data sets manually from the web interface at https://mycoportal.org. You can enter the same query parameters (e.g., taxon, country, year, etc.) as those used in `mycoportal_tab`. When selecting download preferences, select "Tab Delimited" for File Format and "ISO-8859-1 (western)" for Character Set. Downloaded data sets can be imported into R via `read.delim` or `data.table::fread`.
+
+
+```{r include=FALSE}
+# automatically create a bib database for R packages
+knitr::write_bib(c(
+  .packages(), 'fungarium'
+), 'packages.bib')
+```
+
+<!--chapter:end:01-intro.Rmd-->
+
+# Taxonomic analysis {#tax}
+
+## Update taxon names and clean up
+
+Some MyCoPortal records will have outdated or invalid taxonomy; therefore, all taxon names need to be either updated or confirmed using currently accepted taxonomic classification (e.g., [GBIF backbone taxonomy](https://www.gbif.org/dataset/d7dddbf4-2cf0-4f39-9b2a-bb099caae36c)) prior to trait analyses. In the example below, records not identified to the species level are removed from the data set. This helps avoid taxonomy uncertain issues, which are described in more detail by @fungarium2021.
+
+After updating taxonomy, some records may now be classified outside of the taxonomic group that was originally queried. These records need to be removed if your analysis is to focus on the queried taxonomic group only. 
+
+**Example code for updating taxon names and cleaning up data set:**
+```{r load-data, include=TRUE, eval=TRUE, echo=TRUE}
+library(fungarium)
+
+#import sample data set
+data(strophariaceae) #global Strophariaceae records
+
+#see Table 2.1 for preview of Strophariaceae data set
+```
+
+```{r stroph-tab, tidy=TRUE, echo=FALSE}
+table1 <- knitr::kable(
+  head(strophariaceae, 10), caption = 'Preview of Strophariaceae data set',
+  booktabs = TRUE, format = "html"
+)
+kableExtra::scroll_box(kableExtra::kable_styling(table1), width = "100%", height = "300px")
+```
+
+```{r taxon_name_update, include=TRUE, eval=FALSE, echo=TRUE}
+#update names and classification
+data <- taxon_update(strophariaceae, species_only=TRUE, show_status=FALSE) 
+
+#remove records no longer classified in Strophariaceae
+data <- data[data$new_family=="Strophariaceae",] 
+
+#remove records with taxon names that could not be updated or confirmed
+data <- data[data$new_name!="",]
+```
+
+Note that taxon name updating and filtering was done prior to the taxonomic, geographic, and temporal analyses done by @fungarium2021. This is not necessarily required for geographic and temporal analyses; however, you run the risk of including "bad taxa" (i.e. taxa that are not actually classified within your originally specified taxonomic group) in your analyses. Thus, it is recommended to update taxon names and filter before performing any downstream analyses.
+
+## Calculating trait enrichment factors
+
+To make quantitative trait comparisons between taxa, trait-relevant records are first identified using `find_trait` and then trait enrichment factors are calculated using `enrichment`. These enrichment factors correspond to the number of records associated with a certain trait divided by the number of total records for a given taxon. The following example investigates fire-association (i.e., association with fire-affected habitat, hosts, or substrates) as an ecological trait.
+
+**Example code  for finding trait records and calculating enrichment factors:**
+```{r tax_enrich, include=TRUE, eval=FALSE, echo=TRUE}
+#string for finding fire-associated records
+string1 <- "(?i)charred|burn(t|ed)|scorched|fire.?(killed|damaged|scarred)|killed.by.fire"
+
+#string for removing records falsely identified as fire-associated
+string2 <- "(?i)un.?burn(t|ed)"
+
+#filter out records that do not contain any environmental metadata (optional)
+data <- data[data$occurrenceRemarks!=""|data$host!=""|
+                   data$habitat!=""|data$substrate!="",]
+
+#find trait-relevant records
+trait_data <- find_trait(data, pos_string=string1, neg_string=string2)
+
+#get trait enrichment
+trait_enrichment <- enrichment(all_rec=data, trait_rec=trait_data, status_feed=FALSE)
+
+#filter taxa based on collector bias (optional)
+trait_enrichment <- trait_enrichment[trait_enrichment$max_bias<=0.75,]
+
+#filter taxa based on total number of records (optional)
+trait_enrichment <- trait_enrichment[trait_enrichment$freq>=5,]
+```
+
+Note that there are various optional filtering steps that may be done before and after trait searching and enrichment factor calculation, all of which have the potential to improve the accuracy of enrichment values. In the example above, records that did not contain any environmental metadata were removed prior to trait searching. This helps remove potential false negative records (i.e., records that are in fact associated with the trait of interest but are not identified as such), which negatively impact the enrichment factor accuracy. After trait searching and enrichment factor calculation, there a variety of output fields that can be used for data set filtering.
+
+The "freq" or "trait_freq" output fields correspond to the number of total records and the number of trait-relevant records, respectively, for each unique taxon. These can both be used to filter out taxa that have not been sampled thoroughly enough to calculate trustworthy enrichment values (enrichment values are listed under the "trait_ratio" output field; see `enrichment` documentation for more details about output fields). For example, a taxon with 50 total records will have a more trustworthy enrichment value than a taxon that has only 5 total records.
+
+The "max_bias" or "coll_groups" output fields correspond to the maximum proportion of records collected by one group of associated collectors and the total number of associated collector groups, respectively. These fields can be used to filter out taxa that have been collected with a high degree of bias, and, thus, may not have trustworthy enrichment values. For example, a taxon with a "max_bias" value of 0.25 will likely have a more trustworthy enrichment value than a taxon with a value of 0.85. See @fungarium2021 for more details about how enrichment values can be negatively impacted by collector bias.
+
+## Visualize trait enrichment factors
+
+After trait enrichment factors have been calculated for each species, these values can been visualized within a cladogram using `trait_clado`. This function generates a cladogram based on the taxonomic classification of each species (up-to-date taxonomic classification is given in the output of `taxon_update`). Cladogram tip color corresponds to the enrichment value of each species, whereas node color corresponds to the enrichment value of each higher-level taxon in the cladogram. Other tree annotation options are available. See `trait_clado` documentation for more details.
+
+**Example code for making rectangular trait cladogram:**
+```{r load_agar, eval=TRUE}
+#load sample enrichment data set for global Agaricales records
+data(agaricales_enrich)
+
+#see Table 2.2 for preview of Agaricales enrichment data set
+```
+
+```{r agar-tab, tidy=TRUE, echo=FALSE}
+table1 <- knitr::kable(
+  head(agaricales_enrich, 10), caption = 'Preview of Agaricales enrichment data set',
+  booktabs = TRUE, format = "html"
+)
+kableExtra::scroll_box(kableExtra::kable_styling(table1), width = "100%", height = "300px")
+```
+
+```{r rect-clado, fig.cap='Cladogram showing fire-association enrichment for top 100 Agaricales species with the highest enrichment', out.width='50%', fig.asp=2, fig.align='center', eval=TRUE, message=FALSE, warning=FALSE, dpi=300}
+
+#filter taxa based on collector bias
+agaricales_enrich <- agaricales_enrich[agaricales_enrich$max_bias<=0.75,]
+
+#filter for taxa with at least 5 total records
+agaricales_enrich <- agaricales_enrich[agaricales_enrich$freq>=5,]
+
+#make rectangular cladogram
+library(ggtree)
+library(ggplot2)
+
+trait_clado(data=agaricales_enrich, trait_col="trait_ratio", continuous=TRUE,
+            ladderize=TRUE, layout="rectangular", size=1.5,
+            formula = ~new_order/new_family/new_genus/new_name, show=100)+#make tree
+  geom_tiplab(color = "black", hjust = 0, offset = 0.05,
+              size = 2.5, fontface = "italic") + #add species labels
+  geom_tippoint(shape=15, aes(color=trait_ratio), size=2.5)+#add tree tips
+  scale_color_gradientn(colours= c("cyan", "blue", "purple", "red", "orange"),
+                        name = "Fire-associated records enrichment",
+                        limits = c(0, max(agaricales_enrich$trait_ratio)+
+                                   (0.01*max(agaricales_enrich$trait_ratio))),
+                        guide = guide_colourbar(label.vjust = 0.6, 
+                                                label.position = "left", 
+                                                label.theme = element_text(size = 10, colour = "black", angle = 0), 
+                                                title.position = "right", 
+                                                nbin=100, 
+                                                ticks.colour = "white",
+                                                draw.ulim = FALSE, 
+                                                draw.llim = FALSE, 
+                                                barwidth = .5, 
+                                                barheight = 14))+
+  theme(plot.margin=margin(0,0,0,0), 
+        legend.title = element_text(size = 12, angle = 270),
+        legend.title.align = 0.5, 
+        legend.position = "right", 
+        legend.justification = c(0,0.5),
+        legend.margin = margin(0,0,0,0),
+        strip.text = element_blank(),
+        axis.line.x.bottom = element_line(),
+        axis.ticks.x = element_line(),
+        axis.text.x = element_text(size = 12, color = "black"),
+        axis.title.x = element_text(size = 12, color = "black",
+                                    margin=margin(2,0,0,0)))+
+  scale_x_continuous(name = "Taxonomic hierarchy", 
+                     limits = c(0, 3.8), 
+                     breaks = c(0, 1, 2, 3), 
+                     labels = c("O", "F", "G", "S"))
+
+```
+
+
+**Example code for making circular trait cladogram:**
+```{r circle-clado, fig.cap='Circle cladogram showing fire-association enrichment for the top 300 Agaricales species with the highest enrichment', out.width='100%', fig.asp=1, fig.align='center', eval=TRUE, message=FALSE, warning=FALSE, dpi=300}
+#load sample enrichment data set for global Agaricales records
+data(agaricales_enrich)
+
+#filter taxa based on collector bias
+agaricales_enrich <- agaricales_enrich[agaricales_enrich$max_bias<=0.75,]
+
+#filter for taxa with at least 5 total records
+agaricales_enrich <- agaricales_enrich[agaricales_enrich$freq>=5,]
+
+#make circle cladogram
+library(ggtree)
+library(ggplot2)
+
+trait_clado(data=agaricales_enrich, trait_col="trait_ratio", continuous=TRUE,
+            ladderize=TRUE, layout="circular", size=0.8,
+            formula = ~new_order/new_family/new_genus/new_name, show=300)+#make tree
+  geom_tiplab2(color = "black", hjust = 0, offset = 0.1,
+               size = 1.3, fontface = "italic") + #add species labels
+  geom_tippoint(shape=20, 
+                aes(color=trait_ratio, size=trait_freq), 
+                alpha=0.75)+#add tree tips
+  scale_color_gradientn(colours= c("cyan", "blue", "purple", "red", "orange"),
+                        name = "Fire-associated records enrichment",
+                        limits = c(0, max(agaricales_enrich$trait_ratio)+
+                                   (0.01*max(agaricales_enrich$trait_ratio))),
+                        guide = guide_colourbar(label.vjust = 0.6,
+                                                label.theme = element_text(size = 10, colour = "black", angle = 0),
+                                                title.position = "top",
+                                                nbin=100,
+                                                draw.ulim = FALSE,
+                                                draw.llim = FALSE,
+                                                barwidth = 15,
+                                                barheight = 0.5))+
+  scale_size(name = "Fire-associated records",
+             guide = guide_legend(keywidth = 2,
+                                  keyheight = 1,
+                                  label.position = "bottom",
+                                  label.vjust = 0.6,
+                                  label.theme = element_text(size = 10, colour = "black", angle = 0),
+                                  title.position = "top")) +
+  theme(plot.margin=margin(0,0,0,0),
+        legend.title = element_text(size = 10, margin = margin(0,0,0,0)),
+        legend.title.align = 0.5,
+        legend.position = "bottom",
+        legend.justification = "center",
+        legend.margin = margin(0,0,0,0),
+        plot.title = element_text(hjust = 0.5, margin=margin(0,0,0,0)))+
+  xlim(-1,4)#move root away from center;can help improve appearance of circle plot
+```
+
+
+<!--chapter:end:02-tax.Rmd-->
+
+# Geographic analysis {#geo}
+
+Under construction...
+
+<!--chapter:end:03-geo.Rmd-->
+
+# Temporal analysis {#tem}
+
+Under construction...
+
+<!--chapter:end:04-tem.Rmd-->
+
+# Final Words {#conc}
+
+Under construction...
+
+<!--chapter:end:05-conc.Rmd-->
+
+`r if (knitr:::is_html_output()) '
+# References {-}
+'`
+
+<!--chapter:end:06-references.Rmd-->
+

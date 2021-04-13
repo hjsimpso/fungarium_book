@@ -1,4 +1,4 @@
-book_filename: "bookdown-demo"
+book_filename: "fungarium_book"
 output_dir: "docs"
 language:
   ui:

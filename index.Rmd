@@ -4,6 +4,7 @@ author: "Hunter J. Simpson"
 date: "`r Sys.Date()`"
 site: bookdown::bookdown_site
 output: bookdown::gitbook
+always_allow_html: true
 documentclass: book
 bibliography: [book.bib, packages.bib]
 biblio-style: apalike

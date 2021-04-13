@@ -15,3 +15,5 @@ description: "A guide to using fungarium for comprehensive analyses of ecologica
 # Preface {-}
 
 This book provides detailed guidance on how to use the R package [**fungarium**](https://www.github.com/hjsimpso/fungarium) for comprehensive analyses of ecological traits in fungi. These methods were first outlined by @fungarium2021, who used fire-association as an example trait. To maintain consistency, fire-association is used as an example trait in this book as well.
+
+**Note**: Book is under active development, so please excuse any typos, missing details, or incomplete sections.

@@ -1,3 +1,7 @@
+tab:stroph-tab
+tab:agar-tab
+fig:rect-clado
+fig:circle-clado
 intro
 motivation
 getting-started

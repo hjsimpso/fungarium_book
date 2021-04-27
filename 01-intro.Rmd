@@ -15,8 +15,8 @@ Note that while **fungarium** was created for use with MyCoPortal data, many of 
 ### Installing fungarium
 
 ```{r installation, include=TRUE, eval=FALSE, echo=TRUE}
-install.packages("devtools") #Install 'devtools' (if not already installed)
-devtools::install_github("hjsimpso/fungarium") #install fungarium package from github repository
+install.packages("remotes") #install 'remotes' (if not already installed)
+remotes::install_github("hjsimpso/fungarium@*release") #install the latest fungarium release
 ```
 
 ### Installing Docker

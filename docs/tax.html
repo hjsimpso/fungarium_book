@@ -24,7 +24,7 @@
 <meta name="author" content="Hunter J. Simpson" />
 
 
-<meta name="date" content="2021-04-12" />
+<meta name="date" content="2021-04-29" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -774,10 +774,10 @@ Klamath
 <span id="cb4-2"><a href="tax.html#cb4-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">taxon_update</span>(strophariaceae, <span class="at">species_only=</span><span class="cn">TRUE</span>, <span class="at">show_status=</span><span class="cn">FALSE</span>) </span>
 <span id="cb4-3"><a href="tax.html#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-4"><a href="tax.html#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#remove records no longer classified in Strophariaceae</span></span>
-<span id="cb4-5"><a href="tax.html#cb4-5" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data[data<span class="sc">$</span>new_family<span class="sc">==</span><span class="st">&quot;Strophariaceae&quot;</span>,] </span>
+<span id="cb4-5"><a href="tax.html#cb4-5" aria-hidden="true" tabindex="-1"></a>data2 <span class="ot">&lt;-</span> data[data<span class="sc">$</span>new_family<span class="sc">==</span><span class="st">&quot;Strophariaceae&quot;</span>,] </span>
 <span id="cb4-6"><a href="tax.html#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-7"><a href="tax.html#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#remove records with taxon names that could not be updated or confirmed</span></span>
-<span id="cb4-8"><a href="tax.html#cb4-8" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data[data<span class="sc">$</span>new_name<span class="sc">!=</span><span class="st">&quot;&quot;</span>,]</span></code></pre></div>
+<span id="cb4-8"><a href="tax.html#cb4-8" aria-hidden="true" tabindex="-1"></a>data3 <span class="ot">&lt;-</span> data2[data2<span class="sc">$</span>new_name<span class="sc">!=</span><span class="st">&quot;&quot;</span>,]</span></code></pre></div>
 <p>Note that taxon name updating and filtering was done prior to the taxonomic, geographic, and temporal analyses done by <span class="citation"><a href="references.html#ref-fungarium2021" role="doc-biblioref">Simpson and Schilling</a> (<a href="references.html#ref-fungarium2021" role="doc-biblioref">2021</a>)</span>. This is not necessarily required for geographic and temporal analyses; however, you run the risk of including “bad taxa” (i.e. taxa that are not actually classified within your originally specified taxonomic group) in your analyses. Thus, it is recommended to update taxon names and filter before performing any downstream analyses.</p>
 </div>
 <div id="calculating-trait-enrichment-factors" class="section level2" number="2.2">
@@ -791,20 +791,22 @@ Klamath
 <span id="cb5-5"><a href="tax.html#cb5-5" aria-hidden="true" tabindex="-1"></a>string2 <span class="ot">&lt;-</span> <span class="st">&quot;(?i)un.?burn(t|ed)&quot;</span></span>
 <span id="cb5-6"><a href="tax.html#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-7"><a href="tax.html#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">#filter out records that do not contain any environmental metadata (optional)</span></span>
-<span id="cb5-8"><a href="tax.html#cb5-8" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data[data<span class="sc">$</span>occurrenceRemarks<span class="sc">!=</span><span class="st">&quot;&quot;</span><span class="sc">|</span>data<span class="sc">$</span>host<span class="sc">!=</span><span class="st">&quot;&quot;</span><span class="sc">|</span></span>
-<span id="cb5-9"><a href="tax.html#cb5-9" aria-hidden="true" tabindex="-1"></a>                   data<span class="sc">$</span>habitat<span class="sc">!=</span><span class="st">&quot;&quot;</span><span class="sc">|</span>data<span class="sc">$</span>substrate<span class="sc">!=</span><span class="st">&quot;&quot;</span>,]</span>
-<span id="cb5-10"><a href="tax.html#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-11"><a href="tax.html#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co">#find trait-relevant records</span></span>
-<span id="cb5-12"><a href="tax.html#cb5-12" aria-hidden="true" tabindex="-1"></a>trait_data <span class="ot">&lt;-</span> <span class="fu">find_trait</span>(data, <span class="at">pos_string=</span>string1, <span class="at">neg_string=</span>string2)</span>
-<span id="cb5-13"><a href="tax.html#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-14"><a href="tax.html#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co">#get trait enrichment</span></span>
-<span id="cb5-15"><a href="tax.html#cb5-15" aria-hidden="true" tabindex="-1"></a>trait_enrichment <span class="ot">&lt;-</span> <span class="fu">enrichment</span>(<span class="at">all_rec=</span>data, <span class="at">trait_rec=</span>trait_data, <span class="at">status_feed=</span><span class="cn">FALSE</span>)</span>
-<span id="cb5-16"><a href="tax.html#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-17"><a href="tax.html#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co">#filter taxa based on collector bias (optional)</span></span>
-<span id="cb5-18"><a href="tax.html#cb5-18" aria-hidden="true" tabindex="-1"></a>trait_enrichment <span class="ot">&lt;-</span> trait_enrichment[trait_enrichment<span class="sc">$</span>max_bias<span class="sc">&lt;=</span><span class="fl">0.75</span>,]</span>
-<span id="cb5-19"><a href="tax.html#cb5-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-20"><a href="tax.html#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="co">#filter taxa based on total number of records (optional)</span></span>
-<span id="cb5-21"><a href="tax.html#cb5-21" aria-hidden="true" tabindex="-1"></a>trait_enrichment <span class="ot">&lt;-</span> trait_enrichment[trait_enrichment<span class="sc">$</span>freq<span class="sc">&gt;=</span><span class="dv">5</span>,]</span></code></pre></div>
+<span id="cb5-8"><a href="tax.html#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#note that &quot;host&quot; is no longer present in new MyCoPortal data sets; see find_trait documentation</span></span>
+<span id="cb5-9"><a href="tax.html#cb5-9" aria-hidden="true" tabindex="-1"></a>data4 <span class="ot">&lt;-</span> data3[data3<span class="sc">$</span>occurrenceRemarks<span class="sc">!=</span><span class="st">&quot;&quot;</span><span class="sc">|</span>data3<span class="sc">$</span>host<span class="sc">!=</span><span class="st">&quot;&quot;</span><span class="sc">|</span></span>
+<span id="cb5-10"><a href="tax.html#cb5-10" aria-hidden="true" tabindex="-1"></a>                   data3<span class="sc">$</span>habitat<span class="sc">!=</span><span class="st">&quot;&quot;</span><span class="sc">|</span>data3<span class="sc">$</span>substrate<span class="sc">!=</span><span class="st">&quot;&quot;</span>,]</span>
+<span id="cb5-11"><a href="tax.html#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="tax.html#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co">#find trait-relevant records</span></span>
+<span id="cb5-13"><a href="tax.html#cb5-13" aria-hidden="true" tabindex="-1"></a>trait_data <span class="ot">&lt;-</span> <span class="fu">find_trait</span>(data4, <span class="fu">c</span>(<span class="st">&quot;occurrenceRemarks&quot;</span>, <span class="st">&quot;host&quot;</span>, <span class="st">&quot;habitat&quot;</span>, <span class="st">&quot;substrate&quot;</span>),</span>
+<span id="cb5-14"><a href="tax.html#cb5-14" aria-hidden="true" tabindex="-1"></a>                         <span class="at">pos_string=</span>string1, <span class="at">neg_string=</span>string2)</span>
+<span id="cb5-15"><a href="tax.html#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="tax.html#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co">#get trait enrichment</span></span>
+<span id="cb5-17"><a href="tax.html#cb5-17" aria-hidden="true" tabindex="-1"></a>trait_enrichment <span class="ot">&lt;-</span> <span class="fu">enrichment</span>(<span class="at">all_rec=</span>data, <span class="at">trait_rec=</span>trait_data, <span class="at">status_feed=</span><span class="cn">FALSE</span>)</span>
+<span id="cb5-18"><a href="tax.html#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-19"><a href="tax.html#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="co">#filter taxa based on collector bias (optional)</span></span>
+<span id="cb5-20"><a href="tax.html#cb5-20" aria-hidden="true" tabindex="-1"></a>trait_enrichment <span class="ot">&lt;-</span> trait_enrichment[trait_enrichment<span class="sc">$</span>max_bias<span class="sc">&lt;=</span><span class="fl">0.75</span>,]</span>
+<span id="cb5-21"><a href="tax.html#cb5-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-22"><a href="tax.html#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="co">#filter taxa based on total number of records (optional)</span></span>
+<span id="cb5-23"><a href="tax.html#cb5-23" aria-hidden="true" tabindex="-1"></a>trait_enrichment <span class="ot">&lt;-</span> trait_enrichment[trait_enrichment<span class="sc">$</span>freq<span class="sc">&gt;=</span><span class="dv">5</span>,]</span></code></pre></div>
 <p>Note that there are various optional filtering steps that may be done before and after trait searching and enrichment factor calculation, all of which have the potential to improve the accuracy of enrichment values. In the example above, records that did not contain any environmental metadata were removed prior to trait searching. This helps remove potential false negative records (i.e., records that are in fact associated with the trait of interest but are not identified as such), which negatively impact the enrichment factor accuracy. After trait searching and enrichment factor calculation, there a variety of output fields that can be used for data set filtering.</p>
 <p>The “freq” or “trait_freq” output fields correspond to the number of total records and the number of trait-relevant records, respectively, for each unique taxon. These can both be used to filter out taxa that have not been sampled thoroughly enough to calculate trustworthy enrichment values (enrichment values are listed under the “trait_ratio” output field; see <code>enrichment</code> documentation for more details about output fields). For example, a taxon with 50 total records will have a more trustworthy enrichment value than a taxon that has only 5 total records.</p>
 <p>The “max_bias” or “coll_groups” output fields correspond to the maximum proportion of records collected by one group of associated collectors and the total number of associated collector groups, respectively. These fields can be used to filter out taxa that have been collected with a high degree of bias, and, thus, may not have trustworthy enrichment values. For example, a taxon with a “max_bias” value of 0.25 will likely have a more trustworthy enrichment value than a taxon with a value of 0.85. See <span class="citation"><a href="references.html#ref-fungarium2021" role="doc-biblioref">Simpson and Schilling</a> (<a href="references.html#ref-fungarium2021" role="doc-biblioref">2021</a>)</span> for more details about how enrichment values can be negatively impacted by collector bias.</p>
@@ -1412,16 +1414,16 @@ abruptibulbus
 </table>
 </div>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="tax.html#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#filter taxa based on collector bias</span></span>
-<span id="cb7-2"><a href="tax.html#cb7-2" aria-hidden="true" tabindex="-1"></a>agaricales_enrich <span class="ot">&lt;-</span> agaricales_enrich[agaricales_enrich<span class="sc">$</span>max_bias<span class="sc">&lt;=</span><span class="fl">0.75</span>,]</span>
+<span id="cb7-2"><a href="tax.html#cb7-2" aria-hidden="true" tabindex="-1"></a>agaricales_enrich2 <span class="ot">&lt;-</span> agaricales_enrich[agaricales_enrich<span class="sc">$</span>max_bias<span class="sc">&lt;=</span><span class="fl">0.75</span>,]</span>
 <span id="cb7-3"><a href="tax.html#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-4"><a href="tax.html#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">#filter for taxa with at least 5 total records</span></span>
-<span id="cb7-5"><a href="tax.html#cb7-5" aria-hidden="true" tabindex="-1"></a>agaricales_enrich <span class="ot">&lt;-</span> agaricales_enrich[agaricales_enrich<span class="sc">$</span>freq<span class="sc">&gt;=</span><span class="dv">5</span>,]</span>
+<span id="cb7-5"><a href="tax.html#cb7-5" aria-hidden="true" tabindex="-1"></a>agaricales_enrich3 <span class="ot">&lt;-</span> agaricales_enrich2[agaricales_enrich2<span class="sc">$</span>freq<span class="sc">&gt;=</span><span class="dv">5</span>,]</span>
 <span id="cb7-6"><a href="tax.html#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-7"><a href="tax.html#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co">#make rectangular cladogram</span></span>
 <span id="cb7-8"><a href="tax.html#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggtree)</span>
 <span id="cb7-9"><a href="tax.html#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb7-10"><a href="tax.html#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-11"><a href="tax.html#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="fu">trait_clado</span>(<span class="at">data=</span>agaricales_enrich, <span class="at">trait_col=</span><span class="st">&quot;trait_ratio&quot;</span>, <span class="at">continuous=</span><span class="cn">TRUE</span>,</span>
+<span id="cb7-11"><a href="tax.html#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="fu">trait_clado</span>(<span class="at">data=</span>agaricales_enrich3, <span class="at">trait_col=</span><span class="st">&quot;trait_ratio&quot;</span>, <span class="at">continuous=</span><span class="cn">TRUE</span>,</span>
 <span id="cb7-12"><a href="tax.html#cb7-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">ladderize=</span><span class="cn">TRUE</span>, <span class="at">layout=</span><span class="st">&quot;rectangular&quot;</span>, <span class="at">size=</span><span class="fl">1.5</span>,</span>
 <span id="cb7-13"><a href="tax.html#cb7-13" aria-hidden="true" tabindex="-1"></a>            <span class="at">formula =</span> <span class="sc">~</span>new_order<span class="sc">/</span>new_family<span class="sc">/</span>new_genus<span class="sc">/</span>new_name, <span class="at">show=</span><span class="dv">100</span>)<span class="sc">+</span><span class="co">#make tree</span></span>
 <span id="cb7-14"><a href="tax.html#cb7-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tiplab</span>(<span class="at">color =</span> <span class="st">&quot;black&quot;</span>, <span class="at">hjust =</span> <span class="dv">0</span>, <span class="at">offset =</span> <span class="fl">0.05</span>,</span>
@@ -1468,16 +1470,16 @@ Figure 2.1: Cladogram showing fire-association enrichment for top 100 Agaricales
 <span id="cb8-2"><a href="tax.html#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(agaricales_enrich)</span>
 <span id="cb8-3"><a href="tax.html#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-4"><a href="tax.html#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#filter taxa based on collector bias</span></span>
-<span id="cb8-5"><a href="tax.html#cb8-5" aria-hidden="true" tabindex="-1"></a>agaricales_enrich <span class="ot">&lt;-</span> agaricales_enrich[agaricales_enrich<span class="sc">$</span>max_bias<span class="sc">&lt;=</span><span class="fl">0.75</span>,]</span>
+<span id="cb8-5"><a href="tax.html#cb8-5" aria-hidden="true" tabindex="-1"></a>agaricales_enrich2 <span class="ot">&lt;-</span> agaricales_enrich[agaricales_enrich<span class="sc">$</span>max_bias<span class="sc">&lt;=</span><span class="fl">0.75</span>,]</span>
 <span id="cb8-6"><a href="tax.html#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-7"><a href="tax.html#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#filter for taxa with at least 5 total records</span></span>
-<span id="cb8-8"><a href="tax.html#cb8-8" aria-hidden="true" tabindex="-1"></a>agaricales_enrich <span class="ot">&lt;-</span> agaricales_enrich[agaricales_enrich<span class="sc">$</span>freq<span class="sc">&gt;=</span><span class="dv">5</span>,]</span>
+<span id="cb8-8"><a href="tax.html#cb8-8" aria-hidden="true" tabindex="-1"></a>agaricales_enrich3 <span class="ot">&lt;-</span> agaricales_enrich2[agaricales_enrich2<span class="sc">$</span>freq<span class="sc">&gt;=</span><span class="dv">5</span>,]</span>
 <span id="cb8-9"><a href="tax.html#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-10"><a href="tax.html#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#make circle cladogram</span></span>
 <span id="cb8-11"><a href="tax.html#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggtree)</span>
 <span id="cb8-12"><a href="tax.html#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb8-13"><a href="tax.html#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-14"><a href="tax.html#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="fu">trait_clado</span>(<span class="at">data=</span>agaricales_enrich, <span class="at">trait_col=</span><span class="st">&quot;trait_ratio&quot;</span>, <span class="at">continuous=</span><span class="cn">TRUE</span>,</span>
+<span id="cb8-14"><a href="tax.html#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="fu">trait_clado</span>(<span class="at">data=</span>agaricales_enrich3, <span class="at">trait_col=</span><span class="st">&quot;trait_ratio&quot;</span>, <span class="at">continuous=</span><span class="cn">TRUE</span>,</span>
 <span id="cb8-15"><a href="tax.html#cb8-15" aria-hidden="true" tabindex="-1"></a>            <span class="at">ladderize=</span><span class="cn">TRUE</span>, <span class="at">layout=</span><span class="st">&quot;circular&quot;</span>, <span class="at">size=</span><span class="fl">0.8</span>,</span>
 <span id="cb8-16"><a href="tax.html#cb8-16" aria-hidden="true" tabindex="-1"></a>            <span class="at">formula =</span> <span class="sc">~</span>new_order<span class="sc">/</span>new_family<span class="sc">/</span>new_genus<span class="sc">/</span>new_name, <span class="at">show=</span><span class="dv">300</span>)<span class="sc">+</span><span class="co">#make tree</span></span>
 <span id="cb8-17"><a href="tax.html#cb8-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tiplab2</span>(<span class="at">color =</span> <span class="st">&quot;black&quot;</span>, <span class="at">hjust =</span> <span class="dv">0</span>, <span class="at">offset =</span> <span class="fl">0.1</span>,</span>

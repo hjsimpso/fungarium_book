@@ -29,10 +29,10 @@ kableExtra::scroll_box(kableExtra::kable_styling(table1), width = "100%", height
 data <- taxon_update(strophariaceae, species_only=TRUE, show_status=FALSE) 
 
 #remove records no longer classified in Strophariaceae
-data <- data[data$new_family=="Strophariaceae",] 
+data2 <- data[data$new_family=="Strophariaceae",] 
 
 #remove records with taxon names that could not be updated or confirmed
-data <- data[data$new_name!="",]
+data3 <- data2[data2$new_name!="",]
 ```
 
 Note that taxon name updating and filtering was done prior to the taxonomic, geographic, and temporal analyses done by @fungarium2021. This is not necessarily required for geographic and temporal analyses; however, you run the risk of including "bad taxa" (i.e. taxa that are not actually classified within your originally specified taxonomic group) in your analyses. Thus, it is recommended to update taxon names and filter before performing any downstream analyses.
@@ -50,11 +50,13 @@ string1 <- "(?i)charred|burn(t|ed)|scorched|fire.?(killed|damaged|scarred)|kille
 string2 <- "(?i)un.?burn(t|ed)"
 
 #filter out records that do not contain any environmental metadata (optional)
-data <- data[data$occurrenceRemarks!=""|data$host!=""|
-                   data$habitat!=""|data$substrate!="",]
+#note that "host" is no longer present in new MyCoPortal data sets; see find_trait documentation
+data4 <- data3[data3$occurrenceRemarks!=""|data3$host!=""|
+                   data3$habitat!=""|data3$substrate!="",]
 
 #find trait-relevant records
-trait_data <- find_trait(data, pos_string=string1, neg_string=string2)
+trait_data <- find_trait(data4, c("occurrenceRemarks", "host", "habitat", "substrate"),
+                         pos_string=string1, neg_string=string2)
 
 #get trait enrichment
 trait_enrichment <- enrichment(all_rec=data, trait_rec=trait_data, status_feed=FALSE)
@@ -95,16 +97,16 @@ kableExtra::scroll_box(kableExtra::kable_styling(table1), width = "100%", height
 ```{r rect-clado, fig.cap='Cladogram showing fire-association enrichment for top 100 Agaricales species with the highest enrichment', out.width='50%', fig.asp=2, fig.align='center', eval=TRUE, message=FALSE, warning=FALSE, dpi=300}
 
 #filter taxa based on collector bias
-agaricales_enrich <- agaricales_enrich[agaricales_enrich$max_bias<=0.75,]
+agaricales_enrich2 <- agaricales_enrich[agaricales_enrich$max_bias<=0.75,]
 
 #filter for taxa with at least 5 total records
-agaricales_enrich <- agaricales_enrich[agaricales_enrich$freq>=5,]
+agaricales_enrich3 <- agaricales_enrich2[agaricales_enrich2$freq>=5,]
 
 #make rectangular cladogram
 library(ggtree)
 library(ggplot2)
 
-trait_clado(data=agaricales_enrich, trait_col="trait_ratio", continuous=TRUE,
+trait_clado(data=agaricales_enrich3, trait_col="trait_ratio", continuous=TRUE,
             ladderize=TRUE, layout="rectangular", size=1.5,
             formula = ~new_order/new_family/new_genus/new_name, show=100)+#make tree
   geom_tiplab(color = "black", hjust = 0, offset = 0.05,
@@ -150,16 +152,16 @@ trait_clado(data=agaricales_enrich, trait_col="trait_ratio", continuous=TRUE,
 data(agaricales_enrich)
 
 #filter taxa based on collector bias
-agaricales_enrich <- agaricales_enrich[agaricales_enrich$max_bias<=0.75,]
+agaricales_enrich2 <- agaricales_enrich[agaricales_enrich$max_bias<=0.75,]
 
 #filter for taxa with at least 5 total records
-agaricales_enrich <- agaricales_enrich[agaricales_enrich$freq>=5,]
+agaricales_enrich3 <- agaricales_enrich2[agaricales_enrich2$freq>=5,]
 
 #make circle cladogram
 library(ggtree)
 library(ggplot2)
 
-trait_clado(data=agaricales_enrich, trait_col="trait_ratio", continuous=TRUE,
+trait_clado(data=agaricales_enrich3, trait_col="trait_ratio", continuous=TRUE,
             ladderize=TRUE, layout="circular", size=0.8,
             formula = ~new_order/new_family/new_genus/new_name, show=300)+#make tree
   geom_tiplab2(color = "black", hjust = 0, offset = 0.1,

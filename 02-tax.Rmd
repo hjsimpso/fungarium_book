@@ -95,7 +95,7 @@ table1 <- knitr::kable(
 kableExtra::scroll_box(kableExtra::kable_styling(table1), width = "100%", height = "300px")
 ```
 
-```{r rect-clado, fig.cap='Cladogram showing fire-association enrichment for top 100 Agaricales species with the highest enrichment', out.width='50%', fig.asp=2, fig.align='center', eval=TRUE, message=FALSE, warning=FALSE, dpi=300}
+```{r rect-clado, fig.cap='Cladogram showing fire-association enrichment for top 100 Agaricales species with the highest enrichment', out.width='50%', fig.asp=2, fig.align='center', eval=TRUE, message=FALSE, warning=FALSE, dpi=400}
 
 #filter out taxa with high collector bias (optional)
 agaricales_enrich <- agaricales_enrich[agaricales_enrich$max_bias<=0.75,]
@@ -112,7 +112,7 @@ trait_clado(data=agaricales_enrich, continuous="color",
             formula = ~new_order/new_family/new_genus/new_species,
             filter="high-100-trait_ratio", node_all = TRUE)+
   geom_tiplab(color = "black", hjust = 0, offset = 0.1,
-               size = 2.5, fontface = "italic") + #add species labels
+               size = 2.6, fontface = "italic") + #add species labels
   geom_tippoint(shape=20,
                 aes(color=trait_ratio, size=trait_freq),
                 alpha=0.75)+#add tree tips
@@ -151,7 +151,7 @@ trait_clado(data=agaricales_enrich, continuous="color",
 
 
 **Example code for making circular trait cladogram:**
-```{r circle-clado, fig.cap='Circle cladogram showing fire-association enrichment for the top 300 Agaricales species with the highest enrichment', out.width='100%', fig.asp=1, fig.align='center', eval=TRUE, message=FALSE, warning=FALSE, dpi=300}
+```{r circle-clado, fig.cap='Circle cladogram showing fire-association enrichment for the top 300 Agaricales species with the highest enrichment', out.width='100%', fig.asp=1, fig.align='center', eval=TRUE, message=FALSE, warning=FALSE, dpi=400}
 #load sample enrichment data set
 data(agaricales_enrich)
 
@@ -170,7 +170,7 @@ trait_clado(data=agaricales_enrich, continuous="color",
             formula = ~new_order/new_family/new_genus/new_species,
             filter="high-300-trait_ratio", node_all = TRUE)+
   geom_tiplab2(color = "black", hjust = 0, offset = 0.1,
-               size = 1.4, fontface = "italic") + #add species labels
+               size = 1, fontface = "italic") + #add species labels
   geom_tippoint(shape=20,
                 aes(color=trait_ratio, size=trait_freq),
                 alpha=0.75)+#add tree tips

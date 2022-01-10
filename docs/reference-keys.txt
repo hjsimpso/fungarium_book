@@ -6,10 +6,10 @@ intro
 motivation
 getting-started
 installing-fungarium
-installing-docker
 retrieving-mycoportal-data
 mycoportal_tab
 mycoportal-web-interface
+retrieving-gbif-data
 tax
 update-taxon-names-and-clean-up
 calculating-trait-enrichment-factors

@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Chapter 2 Taxonomic analysis | fungarium: Enabling the use of fungaria collections data for comprehensive trait analyses in R</title>
   <meta name="description" content="A guide to using fungarium for comprehensive analyses of ecological traits in fungi." />
-  <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
+  <meta name="generator" content="bookdown 0.24 and GitBook 2.6.7" />
 
   <meta property="og:title" content="Chapter 2 Taxonomic analysis | fungarium: Enabling the use of fungaria collections data for comprehensive trait analyses in R" />
   <meta property="og:type" content="book" />
@@ -24,7 +24,7 @@
 <meta name="author" content="Hunter J. Simpson" />
 
 
-<meta name="date" content="2021-04-29" />
+<meta name="date" content="2022-01-10" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -33,8 +33,9 @@
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
 <link rel="prev" href="intro.html"/>
 <link rel="next" href="geo.html"/>
-<script src="libs/header-attrs-2.7/header-attrs.js"></script>
-<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<script src="libs/header-attrs-2.11/header-attrs.js"></script>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -50,11 +51,10 @@
 
 
 
-
+<link href="libs/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.0.1/anchor-sections.js"></script>
 <script src="libs/kePrint-0.0.1/kePrint.js"></script>
 <link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
-<link href="libs/bsTable-3.3.7/bootstrapTable.min.css" rel="stylesheet" />
-<script src="libs/bsTable-3.3.7/bootstrapTable.js"></script>
 
 
 <style type="text/css">
@@ -122,6 +122,29 @@ code span.vs { color: #4070a0; } /* VerbatimString */
 code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
+<style type="text/css">
+/* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
 <link rel="stylesheet" href="style.css" type="text/css" />
 </head>
 
@@ -145,8 +168,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="1.2" data-path="intro.html"><a href="intro.html#getting-started"><i class="fa fa-check"></i><b>1.2</b> Getting started</a>
 <ul>
 <li class="chapter" data-level="1.2.1" data-path="intro.html"><a href="intro.html#installing-fungarium"><i class="fa fa-check"></i><b>1.2.1</b> Installing fungarium</a></li>
-<li class="chapter" data-level="1.2.2" data-path="intro.html"><a href="intro.html#installing-docker"><i class="fa fa-check"></i><b>1.2.2</b> Installing Docker</a></li>
-<li class="chapter" data-level="1.2.3" data-path="intro.html"><a href="intro.html#retrieving-mycoportal-data"><i class="fa fa-check"></i><b>1.2.3</b> Retrieving MyCoPortal data</a></li>
+<li class="chapter" data-level="1.2.2" data-path="intro.html"><a href="intro.html#retrieving-mycoportal-data"><i class="fa fa-check"></i><b>1.2.2</b> Retrieving MyCoPortal data</a></li>
+<li class="chapter" data-level="1.2.3" data-path="intro.html"><a href="intro.html#retrieving-gbif-data"><i class="fa fa-check"></i><b>1.2.3</b> Retrieving GBIF data</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="2" data-path="tax.html"><a href="tax.html"><i class="fa fa-check"></i><b>2</b> Taxonomic analysis</a>
@@ -183,22 +206,24 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h1><span class="header-section-number">Chapter 2</span> Taxonomic analysis</h1>
 <div id="update-taxon-names-and-clean-up" class="section level2" number="2.1">
 <h2><span class="header-section-number">2.1</span> Update taxon names and clean up</h2>
-<p>Some MyCoPortal records will have outdated or invalid taxonomy; therefore, all taxon names need to be either updated or confirmed using currently accepted taxonomic classification (e.g., <a href="https://www.gbif.org/dataset/d7dddbf4-2cf0-4f39-9b2a-bb099caae36c">GBIF backbone taxonomy</a>) prior to trait analyses. In the example below, records not identified to the species level are removed from the data set. This helps avoid taxonomy uncertain issues, which are described in more detail by <span class="citation"><a href="references.html#ref-fungarium2021" role="doc-biblioref">Simpson and Schilling</a> (<a href="references.html#ref-fungarium2021" role="doc-biblioref">2021</a>)</span>.</p>
+<p>Some MyCoPortal records will have outdated or invalid taxonomy; therefore, all taxon names need to be either updated or confirmed using currently accepted taxonomic classification (e.g., <a href="https://www.gbif.org/dataset/d7dddbf4-2cf0-4f39-9b2a-bb099caae36c">GBIF backbone taxonomy</a>) prior to trait analyses. In the example below, records not identified to the species level are removed from the data set. This helps avoid taxonomy uncertain issues, which are described in more detail by <span class="citation"><a href="#ref-fungarium2021" role="doc-biblioref">Simpson and Schilling</a> (<a href="#ref-fungarium2021" role="doc-biblioref">2021</a>)</span>.</p>
 <p>After updating taxonomy, some records may now be classified outside of the taxonomic group that was originally queried. These records need to be removed if your analysis is to focus on the queried taxonomic group only.</p>
 <p><strong>Example code for updating taxon names and cleaning up data set:</strong></p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="tax.html#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(fungarium)</span>
-<span id="cb3-2"><a href="tax.html#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="tax.html#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#import sample data set</span></span>
-<span id="cb3-4"><a href="tax.html#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(strophariaceae) <span class="co">#global Strophariaceae records</span></span>
-<span id="cb3-5"><a href="tax.html#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-6"><a href="tax.html#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#see Table 2.1 for preview of Strophariaceae data set</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="tax.html#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(fungarium)</span>
+<span id="cb2-2"><a href="tax.html#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="tax.html#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">#import sample data set</span></span>
+<span id="cb2-4"><a href="tax.html#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(agaricales) <span class="co">#US agaricales records</span></span>
+<span id="cb2-5"><a href="tax.html#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="tax.html#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">#see Table 2.1 for preview of agaricales data set</span></span></code></pre></div>
 <div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; overflow-x: scroll; width:100%; ">
 <table class="table" style="margin-left: auto; margin-right: auto;">
 <caption>
-<span id="tab:stroph-tab">Table 2.1: </span>Preview of Strophariaceae data set
+<span id="tab:stroph-tab">Table 2.1: </span>Preview of agaricales data set
 </caption>
 <thead>
 <tr>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+</th>
 <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
 id
 </th>
@@ -215,9 +240,6 @@ scientificNameAuthorship
 recordedBy
 </th>
 <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
-associatedCollectors
-</th>
-<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
 year
 </th>
 <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
@@ -230,10 +252,7 @@ occurrenceRemarks
 habitat
 </th>
 <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
-substrate
-</th>
-<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
-host
+associatedTaxa
 </th>
 <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
 country
@@ -258,137 +277,33 @@ references
 <tbody>
 <tr>
 <td style="text-align:left;">
-267249
+269864
 </td>
 <td style="text-align:left;">
-TENN-F
+9961160
 </td>
 <td style="text-align:left;">
-Naematoloma capnoides
+O
 </td>
 <td style="text-align:left;">
-(Fr.) P. Karst.
+Galerina mniophila
 </td>
 <td style="text-align:left;">
-G. Mueller
+(Lasch) Kühner
 </td>
 <td style="text-align:left;">
+Gro Gulden
 </td>
 <td style="text-align:left;">
-1981
+1997
 </td>
 <td style="text-align:left;">
-1981-09-12
-</td>
-<td style="text-align:left;">
-Notes with specimen
-</td>
-<td style="text-align:left;">
+1997-11-15
 </td>
 <td style="text-align:left;">
 </td>
 <td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-United States
-</td>
-<td style="text-align:left;">
-Colorado
-</td>
-<td style="text-align:left;">
-Larimer
-</td>
-<td style="text-align:left;">
-40.60416667
-</td>
-<td style="text-align:left;">
--105.8458333
-</td>
-<td style="text-align:left;">
-<a href="https://mycoportal.org:443/portal/collections/individual/index.php?occid=267249" class="uri">https://mycoportal.org:443/portal/collections/individual/index.php?occid=267249</a>
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-2365568
-</td>
-<td style="text-align:left;">
-WTU
-</td>
-<td style="text-align:left;">
-Psilocybe weillii
-</td>
-<td style="text-align:left;">
-Guzman, Stamets &amp; Tapia
-</td>
-<td style="text-align:left;">
-P. Stamets
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-1995
-</td>
-<td style="text-align:left;">
-1995-09-00
-</td>
-<td style="text-align:left;">
-Isotype. Substrate: terricolous.
-</td>
-<td style="text-align:left;">
-Underneath Liquidambar and Pinus, in red clay soil enriched with pine needles.
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-U.S.A.
-</td>
-<td style="text-align:left;">
-Georgia
-</td>
-<td style="text-align:left;">
-Cherokee
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-<a href="https://mycoportal.org:443/portal/collections/individual/index.php?occid=2365568" class="uri">https://mycoportal.org:443/portal/collections/individual/index.php?occid=2365568</a>
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-8143194
-</td>
-<td style="text-align:left;">
-MUOB
-</td>
-<td style="text-align:left;">
-Galerina marginata
-</td>
-<td style="text-align:left;">
-(Batsch) Kühner
-</td>
-<td style="text-align:left;">
-MiWoods
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-2017
-</td>
-<td style="text-align:left;">
-2017-10-14
-</td>
-<td style="text-align:left;">
-Found in mulch, 65°F average, rainy days. Have photos of all angles, in the process of spore printing on foil.
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
+young Douglas fir forest
 </td>
 <td style="text-align:left;">
 </td>
@@ -396,144 +311,43 @@ Found in mulch, 65°F average, rainy days. Have photos of all angles, in the pro
 United States
 </td>
 <td style="text-align:left;">
-Michigan
+Oregon
 </td>
 <td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-44.0181
-</td>
-<td style="text-align:left;">
--84.7806
-</td>
-<td style="text-align:left;">
-<a href="https://mycoportal.org:443/portal/collections/individual/index.php?occid=8143194" class="uri">https://mycoportal.org:443/portal/collections/individual/index.php?occid=8143194</a>
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-8066746
-</td>
-<td style="text-align:left;">
-MUOB
-</td>
-<td style="text-align:left;">
-Gymnopilus lepidotus
-</td>
-<td style="text-align:left;">
-Hesler
-</td>
-<td style="text-align:left;">
-Richard Kneal
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-2014
-</td>
-<td style="text-align:left;">
-2014-07-27
+Benton
 </td>
 <td style="text-align:left;">
 </td>
 <td style="text-align:left;">
 </td>
 <td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-United States
-</td>
-<td style="text-align:left;">
-Florida
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-29.6781
-</td>
-<td style="text-align:left;">
--82.3312
-</td>
-<td style="text-align:left;">
-<a href="https://mycoportal.org:443/portal/collections/individual/index.php?occid=8066746" class="uri">https://mycoportal.org:443/portal/collections/individual/index.php?occid=8066746</a>
+<a href="https://mycoportal.org/portal/collections/individual/index.php?occid=9961160" class="uri">https://mycoportal.org/portal/collections/individual/index.php?occid=9961160</a>
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-7629417
+313673
 </td>
 <td style="text-align:left;">
-NY
-</td>
-<td style="text-align:left;">
-Agrocybe smithii
-</td>
-<td style="text-align:left;">
-Watling &amp; H.E. Bigelow
-</td>
-<td style="text-align:left;">
-H. E. Ahles
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-1970
-</td>
-<td style="text-align:left;">
-1970-04-28
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-United States of America
-</td>
-<td style="text-align:left;">
-California
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-<a href="https://mycoportal.org:443/portal/collections/individual/index.php?occid=7629417" class="uri">https://mycoportal.org:443/portal/collections/individual/index.php?occid=7629417</a>
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-452739
+454144
 </td>
 <td style="text-align:left;">
 MICH
 </td>
 <td style="text-align:left;">
-Pholiota decorata
+Mycena galopus
 </td>
 <td style="text-align:left;">
-(Murrill) A.H. Sm. &amp; Hesler
+(Pers.) P. Kumm.
 </td>
 <td style="text-align:left;">
 A. H. Smith
 </td>
 <td style="text-align:left;">
-D. &amp; C. Goetz
+1935
 </td>
 <td style="text-align:left;">
-1970
-</td>
-<td style="text-align:left;">
-1970-11-12
-</td>
-<td style="text-align:left;">
+1935-11-30
 </td>
 <td style="text-align:left;">
 </td>
@@ -545,55 +359,205 @@ D. &amp; C. Goetz
 USA
 </td>
 <td style="text-align:left;">
-Oregon
+California
 </td>
 <td style="text-align:left;">
-Tillamook
+Humboldt
 </td>
 <td style="text-align:left;">
-45.0445
+41.0595
 </td>
 <td style="text-align:left;">
--123.8013
+-124.1419
 </td>
 <td style="text-align:left;">
-<a href="https://mycoportal.org:443/portal/collections/individual/index.php?occid=452739" class="uri">https://mycoportal.org:443/portal/collections/individual/index.php?occid=452739</a>
+<a href="https://mycoportal.org/portal/collections/individual/index.php?occid=454144" class="uri">https://mycoportal.org/portal/collections/individual/index.php?occid=454144</a>
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-2817241
+157092
 </td>
 <td style="text-align:left;">
-F
+4570238
 </td>
 <td style="text-align:left;">
-Pholiota squarrosa
+iNaturalist
+</td>
+<td style="text-align:left;">
+Armillaria mellea
 </td>
 <td style="text-align:left;">
 (Vahl) P. Kumm.
 </td>
 <td style="text-align:left;">
-E. T. Harper &amp; S. A. Harper
+Cindy Trubovitz
 </td>
 <td style="text-align:left;">
+2017
 </td>
 <td style="text-align:left;">
-1911
+2017-01-07
 </td>
 <td style="text-align:left;">
-1911-08-18
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
+&lt;p&gt;Growing from the base of an old log&lt;/p&gt;; &lt;a href=‘<a href="https://www.inaturalist.org/observations/5244247" class="uri">https://www.inaturalist.org/observations/5244247</a>’ target=’_blank’ style=‘color: blue;’&gt; Original observation #5244247 (iNaturalist)&lt;/a&gt;
 </td>
 <td style="text-align:left;">
 </td>
 <td style="text-align:left;">
 </td>
 <td style="text-align:left;">
-U.S.A.
+United States
+</td>
+<td style="text-align:left;">
+California
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+32.80975
+</td>
+<td style="text-align:left;">
+-117.1295
+</td>
+<td style="text-align:left;">
+<a href="https://mycoportal.org/portal/collections/individual/index.php?occid=4570238" class="uri">https://mycoportal.org/portal/collections/individual/index.php?occid=4570238</a>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+281279
+</td>
+<td style="text-align:left;">
+456630
+</td>
+<td style="text-align:left;">
+MICH
+</td>
+<td style="text-align:left;">
+Hygrophorus olivaceoalbus
+</td>
+<td style="text-align:left;">
+(Fr.) Fr. 
+</td>
+<td style="text-align:left;">
+R. L. Shaffer
+</td>
+<td style="text-align:left;">
+1956
+</td>
+<td style="text-align:left;">
+1956-09-16
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+USA
+</td>
+<td style="text-align:left;">
+Idaho
+</td>
+<td style="text-align:left;">
+Valley
+</td>
+<td style="text-align:left;">
+44.8753
+</td>
+<td style="text-align:left;">
+-115.9017
+</td>
+<td style="text-align:left;">
+<a href="https://mycoportal.org/portal/collections/individual/index.php?occid=456630" class="uri">https://mycoportal.org/portal/collections/individual/index.php?occid=456630</a>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+32558
+</td>
+<td style="text-align:left;">
+2270252
+</td>
+<td style="text-align:left;">
+MICH
+</td>
+<td style="text-align:left;">
+Cortinarius
+</td>
+<td style="text-align:left;">
+(Pers.) Gray
+</td>
+<td style="text-align:left;">
+S. J. Mazzer
+</td>
+<td style="text-align:left;">
+1970
+</td>
+<td style="text-align:left;">
+1970-05-31
+</td>
+<td style="text-align:left;">
+[Collection is stored in Cortinarius indeterminate box]
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+USA
+</td>
+<td style="text-align:left;">
+Michigan
+</td>
+<td style="text-align:left;">
+Cheboygan
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+<a href="https://mycoportal.org/portal/collections/individual/index.php?occid=2270252" class="uri">https://mycoportal.org/portal/collections/individual/index.php?occid=2270252</a>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+522392
+</td>
+<td style="text-align:left;">
+345316
+</td>
+<td style="text-align:left;">
+MICH
+</td>
+<td style="text-align:left;">
+Crepidotus malachius var. phragmocystidiosus
+</td>
+<td style="text-align:left;">
+Hesler &amp; A.H. Sm.
+</td>
+<td style="text-align:left;">
+A. H. Smith
+</td>
+<td style="text-align:left;">
+1959
+</td>
+<td style="text-align:left;">
+1959-08-18
+</td>
+<td style="text-align:left;">
+Notes with collection North Amer. Sp. Crepidotus 1965 pg. 58.
+</td>
+<td style="text-align:left;">
+On hardwood
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+USA
 </td>
 <td style="text-align:left;">
 Michigan
@@ -602,151 +566,193 @@ Michigan
 Chippewa
 </td>
 <td style="text-align:left;">
-46.2833
 </td>
 <td style="text-align:left;">
--84.15
 </td>
 <td style="text-align:left;">
-<a href="https://mycoportal.org:443/portal/collections/individual/index.php?occid=2817241" class="uri">https://mycoportal.org:443/portal/collections/individual/index.php?occid=2817241</a>
+<a href="https://mycoportal.org/portal/collections/individual/index.php?occid=345316" class="uri">https://mycoportal.org/portal/collections/individual/index.php?occid=345316</a>
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-7994039
+234305
 </td>
 <td style="text-align:left;">
-MUOB
-</td>
-<td style="text-align:left;">
-Hypholoma capnoides
-</td>
-<td style="text-align:left;">
-(Fr.) P. Kumm.
-</td>
-<td style="text-align:left;">
-Tim Sage
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-2010
-</td>
-<td style="text-align:left;">
-2010-02-12
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-United States
-</td>
-<td style="text-align:left;">
-Washington
-</td>
-<td style="text-align:left;">
-King
-</td>
-<td style="text-align:left;">
-47.7411
-</td>
-<td style="text-align:left;">
--122.3025
-</td>
-<td style="text-align:left;">
-<a href="https://mycoportal.org:443/portal/collections/individual/index.php?occid=7994039" class="uri">https://mycoportal.org:443/portal/collections/individual/index.php?occid=7994039</a>
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-8044947
-</td>
-<td style="text-align:left;">
-MUOB
-</td>
-<td style="text-align:left;">
-Hypholoma fasciculare
-</td>
-<td style="text-align:left;">
-(Huds.) P. Kumm.
-</td>
-<td style="text-align:left;">
-Nihilist
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-2013
-</td>
-<td style="text-align:left;">
-2013-06-19
-</td>
-<td style="text-align:left;">
-Just wanted to add some pictures to the database of some older ones.
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-United States
-</td>
-<td style="text-align:left;">
-Ohio
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-40.07
-</td>
-<td style="text-align:left;">
--82.64
-</td>
-<td style="text-align:left;">
-<a href="https://mycoportal.org:443/portal/collections/individual/index.php?occid=8044947" class="uri">https://mycoportal.org:443/portal/collections/individual/index.php?occid=8044947</a>
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-3902763
+526338
 </td>
 <td style="text-align:left;">
 OSC
 </td>
 <td style="text-align:left;">
-Nivatogastrium nubigenum
+Cortinarius montanus
 </td>
 <td style="text-align:left;">
-(Harkn.) Singer &amp; A.H. Sm.
+Kauffman
 </td>
 <td style="text-align:left;">
-Carlisle
+Jim Trappe
+</td>
+<td style="text-align:left;">
+1976
+</td>
+<td style="text-align:left;">
+1976-09-08
+</td>
+<td style="text-align:left;">
+Old-growth Tsme
+</td>
+<td style="text-align:left;">
+Old-growth Tsme
 </td>
 <td style="text-align:left;">
 </td>
 <td style="text-align:left;">
-2000
+USA
 </td>
 <td style="text-align:left;">
-2000-06-07
+Oregon
 </td>
 <td style="text-align:left;">
-No additional notes on file.
+Lane
 </td>
 <td style="text-align:left;">
 </td>
 <td style="text-align:left;">
-Substrate: Abies magnifica var shastensis wood
 </td>
 <td style="text-align:left;">
-Abies magnifica var shastensis
+<a href="https://mycoportal.org/portal/collections/individual/index.php?occid=526338" class="uri">https://mycoportal.org/portal/collections/individual/index.php?occid=526338</a>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+356189
+</td>
+<td style="text-align:left;">
+2287069
+</td>
+<td style="text-align:left;">
+DUKE
+</td>
+<td style="text-align:left;">
+Schizophyllum commune
+</td>
+<td style="text-align:left;">
+Fr. 
+</td>
+<td style="text-align:left;">
+D. Porter
+</td>
+<td style="text-align:left;">
+1998
+</td>
+<td style="text-align:left;">
+1998-04-00
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+United States
+</td>
+<td style="text-align:left;">
+Georgia
+</td>
+<td style="text-align:left;">
+Clarke
+</td>
+<td style="text-align:left;">
+33.95
+</td>
+<td style="text-align:left;">
+-83.383333
+</td>
+<td style="text-align:left;">
+<a href="https://mycoportal.org/portal/collections/individual/index.php?occid=2287069" class="uri">https://mycoportal.org/portal/collections/individual/index.php?occid=2287069</a>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+237907
+</td>
+<td style="text-align:left;">
+2357852
+</td>
+<td style="text-align:left;">
+WTU
+</td>
+<td style="text-align:left;">
+Cortinarius rubicundulus
+</td>
+<td style="text-align:left;">
+(Rea) A. Pearson
+</td>
+<td style="text-align:left;">
+L. L. Norvell, SAR.
+</td>
+<td style="text-align:left;">
+1992
+</td>
+<td style="text-align:left;">
+1992-11-17
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Rotten wood/ duff. Sequoia, Tan Oak.
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+U.S.A.
+</td>
+<td style="text-align:left;">
+California
+</td>
+<td style="text-align:left;">
+Mendocino
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+<a href="https://mycoportal.org/portal/collections/individual/index.php?occid=2357852" class="uri">https://mycoportal.org/portal/collections/individual/index.php?occid=2357852</a>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+140361
+</td>
+<td style="text-align:left;">
+6920708
+</td>
+<td style="text-align:left;">
+iNaturalist
+</td>
+<td style="text-align:left;">
+Amanita pachycolea
+</td>
+<td style="text-align:left;">
+D.E. Stuntz
+</td>
+<td style="text-align:left;">
+Taylor Bates
+</td>
+<td style="text-align:left;">
+2017
+</td>
+<td style="text-align:left;">
+2017-11-13
+</td>
+<td style="text-align:left;">
+&lt;a href=‘<a href="https://www.inaturalist.org/observations/8797347" class="uri">https://www.inaturalist.org/observations/8797347</a>’ target=’_blank’ style=‘color: blue;’&gt; Original observation #8797347 (iNaturalist)&lt;/a&gt;
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
 </td>
 <td style="text-align:left;">
 United States
@@ -755,70 +761,69 @@ United States
 Oregon
 </td>
 <td style="text-align:left;">
-Klamath
 </td>
 <td style="text-align:left;">
-42.883
+44.665631
 </td>
 <td style="text-align:left;">
--121.9277
+-123.242596
 </td>
 <td style="text-align:left;">
-<a href="https://mycoportal.org:443/portal/collections/individual/index.php?occid=3902763" class="uri">https://mycoportal.org:443/portal/collections/individual/index.php?occid=3902763</a>
+<a href="https://mycoportal.org/portal/collections/individual/index.php?occid=6920708" class="uri">https://mycoportal.org/portal/collections/individual/index.php?occid=6920708</a>
 </td>
 </tr>
 </tbody>
 </table>
 </div>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="tax.html#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#update names and classification</span></span>
-<span id="cb4-2"><a href="tax.html#cb4-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">taxon_update</span>(strophariaceae, <span class="at">species_only=</span><span class="cn">TRUE</span>, <span class="at">show_status=</span><span class="cn">FALSE</span>) </span>
-<span id="cb4-3"><a href="tax.html#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="tax.html#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#remove records no longer classified in Strophariaceae</span></span>
-<span id="cb4-5"><a href="tax.html#cb4-5" aria-hidden="true" tabindex="-1"></a>data2 <span class="ot">&lt;-</span> data[data<span class="sc">$</span>new_family<span class="sc">==</span><span class="st">&quot;Strophariaceae&quot;</span>,] </span>
-<span id="cb4-6"><a href="tax.html#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-7"><a href="tax.html#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#remove records with taxon names that could not be updated or confirmed</span></span>
-<span id="cb4-8"><a href="tax.html#cb4-8" aria-hidden="true" tabindex="-1"></a>data3 <span class="ot">&lt;-</span> data2[data2<span class="sc">$</span>new_name<span class="sc">!=</span><span class="st">&quot;&quot;</span>,]</span></code></pre></div>
-<p>Note that taxon name updating and filtering was done prior to the taxonomic, geographic, and temporal analyses done by <span class="citation"><a href="references.html#ref-fungarium2021" role="doc-biblioref">Simpson and Schilling</a> (<a href="references.html#ref-fungarium2021" role="doc-biblioref">2021</a>)</span>. This is not necessarily required for geographic and temporal analyses; however, you run the risk of including “bad taxa” (i.e. taxa that are not actually classified within your originally specified taxonomic group) in your analyses. Thus, it is recommended to update taxon names and filter before performing any downstream analyses.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="tax.html#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#update names and classification</span></span>
+<span id="cb3-2"><a href="tax.html#cb3-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">taxon_update</span>(agaricales, <span class="at">species_only=</span><span class="cn">TRUE</span>, <span class="at">show_status=</span><span class="cn">FALSE</span>)</span>
+<span id="cb3-3"><a href="tax.html#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="tax.html#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#remove records with taxon names that could not be updated or confirmed</span></span>
+<span id="cb3-5"><a href="tax.html#cb3-5" aria-hidden="true" tabindex="-1"></a>data2 <span class="ot">&lt;-</span> data[data<span class="sc">$</span>new_species<span class="sc">!=</span><span class="st">&quot;&quot;</span>,]</span>
+<span id="cb3-6"><a href="tax.html#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="tax.html#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#remove records no longer classified in agaricales</span></span>
+<span id="cb3-8"><a href="tax.html#cb3-8" aria-hidden="true" tabindex="-1"></a>data3 <span class="ot">&lt;-</span> data2[data2<span class="sc">$</span>new_order<span class="sc">==</span><span class="st">&quot;Agaricales&quot;</span>,] </span></code></pre></div>
+<p>Note that taxon name updating and filtering was done prior to the taxonomic, geographic, and temporal analyses done by <span class="citation"><a href="#ref-fungarium2021" role="doc-biblioref">Simpson and Schilling</a> (<a href="#ref-fungarium2021" role="doc-biblioref">2021</a>)</span>. This is not necessarily required for geographic and temporal analyses; however, you run the risk of including “bad taxa” (i.e. taxa that are not actually classified within your originally specified taxonomic group) in your analyses. Thus, it is recommended to update taxon names and filter before performing any downstream analyses.</p>
 </div>
 <div id="calculating-trait-enrichment-factors" class="section level2" number="2.2">
 <h2><span class="header-section-number">2.2</span> Calculating trait enrichment factors</h2>
 <p>To make quantitative trait comparisons between taxa, trait-relevant records are first identified using <code>find_trait</code> and then trait enrichment factors are calculated using <code>enrichment</code>. These enrichment factors correspond to the number of records associated with a certain trait divided by the number of total records for a given taxon. The following example investigates fire-association (i.e., association with fire-affected habitat, hosts, or substrates) as an ecological trait.</p>
 <p><strong>Example code for finding trait records and calculating enrichment factors:</strong></p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="tax.html#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#string for finding fire-associated records</span></span>
-<span id="cb5-2"><a href="tax.html#cb5-2" aria-hidden="true" tabindex="-1"></a>string1 <span class="ot">&lt;-</span> <span class="st">&quot;(?i)charred|burn(t|ed)|scorched|fire.?(killed|damaged|scarred)|killed.by.fire&quot;</span></span>
-<span id="cb5-3"><a href="tax.html#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="tax.html#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">#string for removing records falsely identified as fire-associated</span></span>
-<span id="cb5-5"><a href="tax.html#cb5-5" aria-hidden="true" tabindex="-1"></a>string2 <span class="ot">&lt;-</span> <span class="st">&quot;(?i)un.?burn(t|ed)&quot;</span></span>
-<span id="cb5-6"><a href="tax.html#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-7"><a href="tax.html#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">#filter out records that do not contain any environmental metadata (optional)</span></span>
-<span id="cb5-8"><a href="tax.html#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#note that &quot;host&quot; is no longer present in new MyCoPortal data sets; see find_trait documentation</span></span>
-<span id="cb5-9"><a href="tax.html#cb5-9" aria-hidden="true" tabindex="-1"></a>data4 <span class="ot">&lt;-</span> data3[data3<span class="sc">$</span>occurrenceRemarks<span class="sc">!=</span><span class="st">&quot;&quot;</span><span class="sc">|</span>data3<span class="sc">$</span>host<span class="sc">!=</span><span class="st">&quot;&quot;</span><span class="sc">|</span></span>
-<span id="cb5-10"><a href="tax.html#cb5-10" aria-hidden="true" tabindex="-1"></a>                   data3<span class="sc">$</span>habitat<span class="sc">!=</span><span class="st">&quot;&quot;</span><span class="sc">|</span>data3<span class="sc">$</span>substrate<span class="sc">!=</span><span class="st">&quot;&quot;</span>,]</span>
-<span id="cb5-11"><a href="tax.html#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-12"><a href="tax.html#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co">#find trait-relevant records</span></span>
-<span id="cb5-13"><a href="tax.html#cb5-13" aria-hidden="true" tabindex="-1"></a>trait_data <span class="ot">&lt;-</span> <span class="fu">find_trait</span>(data4, <span class="fu">c</span>(<span class="st">&quot;occurrenceRemarks&quot;</span>, <span class="st">&quot;host&quot;</span>, <span class="st">&quot;habitat&quot;</span>, <span class="st">&quot;substrate&quot;</span>),</span>
-<span id="cb5-14"><a href="tax.html#cb5-14" aria-hidden="true" tabindex="-1"></a>                         <span class="at">pos_string=</span>string1, <span class="at">neg_string=</span>string2)</span>
-<span id="cb5-15"><a href="tax.html#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-16"><a href="tax.html#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co">#get trait enrichment</span></span>
-<span id="cb5-17"><a href="tax.html#cb5-17" aria-hidden="true" tabindex="-1"></a>trait_enrichment <span class="ot">&lt;-</span> <span class="fu">enrichment</span>(<span class="at">all_rec=</span>data, <span class="at">trait_rec=</span>trait_data, <span class="at">status_feed=</span><span class="cn">FALSE</span>)</span>
-<span id="cb5-18"><a href="tax.html#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-19"><a href="tax.html#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="co">#filter taxa based on collector bias (optional)</span></span>
-<span id="cb5-20"><a href="tax.html#cb5-20" aria-hidden="true" tabindex="-1"></a>trait_enrichment <span class="ot">&lt;-</span> trait_enrichment[trait_enrichment<span class="sc">$</span>max_bias<span class="sc">&lt;=</span><span class="fl">0.75</span>,]</span>
-<span id="cb5-21"><a href="tax.html#cb5-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-22"><a href="tax.html#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="co">#filter taxa based on total number of records (optional)</span></span>
-<span id="cb5-23"><a href="tax.html#cb5-23" aria-hidden="true" tabindex="-1"></a>trait_enrichment <span class="ot">&lt;-</span> trait_enrichment[trait_enrichment<span class="sc">$</span>freq<span class="sc">&gt;=</span><span class="dv">5</span>,]</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="tax.html#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#string for finding fire-associated records</span></span>
+<span id="cb4-2"><a href="tax.html#cb4-2" aria-hidden="true" tabindex="-1"></a>string1 <span class="ot">&lt;-</span> <span class="st">&quot;(?i)charred|burn(t|ed)|scorched|fire.?(killed|damaged|scarred)|killed.by.fire&quot;</span></span>
+<span id="cb4-3"><a href="tax.html#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="tax.html#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#string for removing records falsely identified as fire-associated</span></span>
+<span id="cb4-5"><a href="tax.html#cb4-5" aria-hidden="true" tabindex="-1"></a>string2 <span class="ot">&lt;-</span> <span class="st">&quot;(?i)un.?burn(t|ed)&quot;</span></span>
+<span id="cb4-6"><a href="tax.html#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="tax.html#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#filter out records that do not contain any environmental metadata (optional)</span></span>
+<span id="cb4-8"><a href="tax.html#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">#note that &quot;host&quot; is no longer present in new MyCoPortal data sets; see find_trait documentation</span></span>
+<span id="cb4-9"><a href="tax.html#cb4-9" aria-hidden="true" tabindex="-1"></a>data4 <span class="ot">&lt;-</span> data3[data3<span class="sc">$</span>occurrenceRemarks<span class="sc">!=</span><span class="st">&quot;&quot;</span><span class="sc">|</span>data3<span class="sc">$</span>associatedTaxa<span class="sc">!=</span><span class="st">&quot;&quot;</span><span class="sc">|</span></span>
+<span id="cb4-10"><a href="tax.html#cb4-10" aria-hidden="true" tabindex="-1"></a>                   data3<span class="sc">$</span>habitat<span class="sc">!=</span><span class="st">&quot;&quot;</span>,]</span>
+<span id="cb4-11"><a href="tax.html#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="tax.html#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">#find trait-relevant records</span></span>
+<span id="cb4-13"><a href="tax.html#cb4-13" aria-hidden="true" tabindex="-1"></a>trait_data <span class="ot">&lt;-</span> <span class="fu">find_trait</span>(data4,</span>
+<span id="cb4-14"><a href="tax.html#cb4-14" aria-hidden="true" tabindex="-1"></a>                         <span class="at">pos_string=</span>string1, <span class="at">neg_string=</span>string2)</span>
+<span id="cb4-15"><a href="tax.html#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="tax.html#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">#get trait enrichment</span></span>
+<span id="cb4-17"><a href="tax.html#cb4-17" aria-hidden="true" tabindex="-1"></a>trait_enrichment <span class="ot">&lt;-</span> <span class="fu">enrichment</span>(<span class="at">all_rec=</span>data, <span class="at">trait_rec=</span>trait_data, <span class="at">coll_bias=</span><span class="cn">TRUE</span>, <span class="at">status_feed=</span><span class="cn">FALSE</span>)</span>
+<span id="cb4-18"><a href="tax.html#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="tax.html#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co">#filter taxa based on collector bias (optional)</span></span>
+<span id="cb4-20"><a href="tax.html#cb4-20" aria-hidden="true" tabindex="-1"></a>trait_enrichment <span class="ot">&lt;-</span> trait_enrichment[trait_enrichment<span class="sc">$</span>max_bias<span class="sc">&lt;=</span><span class="fl">0.75</span>,]</span>
+<span id="cb4-21"><a href="tax.html#cb4-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-22"><a href="tax.html#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co">#filter taxa based on total number of records (optional)</span></span>
+<span id="cb4-23"><a href="tax.html#cb4-23" aria-hidden="true" tabindex="-1"></a>trait_enrichment <span class="ot">&lt;-</span> trait_enrichment[trait_enrichment<span class="sc">$</span>freq<span class="sc">&gt;=</span><span class="dv">5</span>,]</span></code></pre></div>
 <p>Note that there are various optional filtering steps that may be done before and after trait searching and enrichment factor calculation, all of which have the potential to improve the accuracy of enrichment values. In the example above, records that did not contain any environmental metadata were removed prior to trait searching. This helps remove potential false negative records (i.e., records that are in fact associated with the trait of interest but are not identified as such), which negatively impact the enrichment factor accuracy. After trait searching and enrichment factor calculation, there a variety of output fields that can be used for data set filtering.</p>
 <p>The “freq” or “trait_freq” output fields correspond to the number of total records and the number of trait-relevant records, respectively, for each unique taxon. These can both be used to filter out taxa that have not been sampled thoroughly enough to calculate trustworthy enrichment values (enrichment values are listed under the “trait_ratio” output field; see <code>enrichment</code> documentation for more details about output fields). For example, a taxon with 50 total records will have a more trustworthy enrichment value than a taxon that has only 5 total records.</p>
-<p>The “max_bias” or “coll_groups” output fields correspond to the maximum proportion of records collected by one group of associated collectors and the total number of associated collector groups, respectively. These fields can be used to filter out taxa that have been collected with a high degree of bias, and, thus, may not have trustworthy enrichment values. For example, a taxon with a “max_bias” value of 0.25 will likely have a more trustworthy enrichment value than a taxon with a value of 0.85. See <span class="citation"><a href="references.html#ref-fungarium2021" role="doc-biblioref">Simpson and Schilling</a> (<a href="references.html#ref-fungarium2021" role="doc-biblioref">2021</a>)</span> for more details about how enrichment values can be negatively impacted by collector bias.</p>
+<p>The “max_bias” or “coll_groups” output fields correspond to the maximum proportion of records collected by one group of associated collectors and the total number of associated collector groups, respectively. These fields can be used to filter out taxa that have been collected with a high degree of bias, and, thus, may not have trustworthy enrichment values. For example, a taxon with a “max_bias” value of 0.25 will likely have a more trustworthy enrichment value than a taxon with a value of 0.85. See <span class="citation"><a href="#ref-fungarium2021" role="doc-biblioref">Simpson and Schilling</a> (<a href="#ref-fungarium2021" role="doc-biblioref">2021</a>)</span> for more details about how enrichment values can be negatively impacted by collector bias.</p>
 </div>
 <div id="visualize-trait-enrichment-factors" class="section level2" number="2.3">
 <h2><span class="header-section-number">2.3</span> Visualize trait enrichment factors</h2>
 <p>After trait enrichment factors have been calculated for each species, these values can been visualized within a cladogram using <code>trait_clado</code>. This function generates a cladogram based on the taxonomic classification of each species (up-to-date taxonomic classification is given in the output of <code>taxon_update</code>). Cladogram tip color corresponds to the enrichment value of each species, whereas node color corresponds to the enrichment value of each higher-level taxon in the cladogram. Other tree annotation options are available. See <code>trait_clado</code> documentation for more details.</p>
 <p><strong>Example code for making rectangular trait cladogram:</strong></p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="tax.html#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#load sample enrichment data set for global Agaricales records</span></span>
-<span id="cb6-2"><a href="tax.html#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(agaricales_enrich)</span>
-<span id="cb6-3"><a href="tax.html#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-4"><a href="tax.html#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">#see Table 2.2 for preview of Agaricales enrichment data set</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="tax.html#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#load sample enrichment data set for global Agaricales records</span></span>
+<span id="cb5-2"><a href="tax.html#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(agaricales_enrich)</span>
+<span id="cb5-3"><a href="tax.html#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="tax.html#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">#see Table 2.2 for preview of Agaricales enrichment data set</span></span></code></pre></div>
 <div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; overflow-x: scroll; width:100%; ">
 <table class="table" style="margin-left: auto; margin-right: auto;">
 <caption>
@@ -827,13 +832,42 @@ Klamath
 <thead>
 <tr>
 <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
 new_full_name
 </th>
-<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
-new_name
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+freq
 </th>
-<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
-new_author
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+trait_freq
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+trait_ratio
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+coll_blanks
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+blanks_bias
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+coll_blanks_t
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+blanks_bias_t
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+max_bias
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+coll_groups
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+max_bias_t
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+coll_groups_t
 </th>
 <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
 new_kingdom
@@ -854,41 +888,50 @@ new_family
 new_genus
 </th>
 <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
-new_specific_epithet
-</th>
-<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
-freq
-</th>
-<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
-trait_freq
-</th>
-<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
-trait_ratio
-</th>
-<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
-max_bias
-</th>
-<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
-coll_groups
-</th>
-<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
-max_bias_t
-</th>
-<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
-coll_groups_t
+new_species
 </th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align:left;">
-Abstoma pampeanum (Speg.) J.E.Wright &amp; V.L.Suárez
+3050
 </td>
 <td style="text-align:left;">
-Abstoma pampeanum
+Tricholomopsis rutilans (Schaeff.) Singer
 </td>
-<td style="text-align:left;">
-(Speg.) J.E.Wright &amp; V.L.Suárez
+<td style="text-align:right;">
+64
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0.046875
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0468750
+</td>
+<td style="text-align:right;">
+48
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
 </td>
 <td style="text-align:left;">
 Fungi
@@ -903,16 +946,36 @@ Agaricomycetes
 Agaricales
 </td>
 <td style="text-align:left;">
-Agaricaceae
+Tricholomataceae
 </td>
 <td style="text-align:left;">
-Abstoma
+Tricholomopsis
 </td>
 <td style="text-align:left;">
-pampeanum
+Tricholomopsis rutilans
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+1959
+</td>
+<td style="text-align:left;">
+Coprinopsis cordispora (T.Gibbs) Watling &amp; M.J.Richardson
 </td>
 <td style="text-align:right;">
 4
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0.250000
 </td>
 <td style="text-align:right;">
 0
@@ -932,16 +995,67 @@ pampeanum
 <td style="text-align:right;">
 0
 </td>
+<td style="text-align:left;">
+Fungi
+</td>
+<td style="text-align:left;">
+Basidiomycota
+</td>
+<td style="text-align:left;">
+Agaricomycetes
+</td>
+<td style="text-align:left;">
+Agaricales
+</td>
+<td style="text-align:left;">
+Psathyrellaceae
+</td>
+<td style="text-align:left;">
+Coprinopsis
+</td>
+<td style="text-align:left;">
+Coprinopsis cordispora
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
-Abstoma purpureum (Lloyd) G.Cunn.
+2009
 </td>
 <td style="text-align:left;">
-Abstoma purpureum
+Hebeloma leucosarx P.D.Orton
 </td>
-<td style="text-align:left;">
-(Lloyd) G.Cunn.
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.000000
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.2500000
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
 </td>
 <td style="text-align:left;">
 Fungi
@@ -956,45 +1070,54 @@ Agaricomycetes
 Agaricales
 </td>
 <td style="text-align:left;">
-Agaricaceae
+Hymenogastraceae
 </td>
 <td style="text-align:left;">
-Abstoma
+Hebeloma
 </td>
 <td style="text-align:left;">
-purpureum
-</td>
-<td style="text-align:right;">
-8
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0.7500000
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
+Hebeloma leucosarx
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-Abstoma reticulatum G.Cunn.
+2977
 </td>
 <td style="text-align:left;">
-Abstoma reticulatum
+Amanita virosa Bertill.
 </td>
-<td style="text-align:left;">
-G.Cunn.
+<td style="text-align:right;">
+39
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0.025641
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.1025641
+</td>
+<td style="text-align:right;">
+28
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
 </td>
 <td style="text-align:left;">
 Fungi
@@ -1009,45 +1132,54 @@ Agaricomycetes
 Agaricales
 </td>
 <td style="text-align:left;">
-Agaricaceae
+Amanitaceae
 </td>
 <td style="text-align:left;">
-Abstoma
+Amanita
 </td>
 <td style="text-align:left;">
-reticulatum
-</td>
-<td style="text-align:right;">
-6
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0.3333333
-</td>
-<td style="text-align:right;">
-5
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
+Amanita virosa
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-Abstoma stuckertii (Speg.) J.E.Wright &amp; V.L.Suárez
+172
 </td>
 <td style="text-align:left;">
-Abstoma stuckertii
+Clitopilus piperitus (G.Stev.) Noordel. &amp; Co-David
 </td>
-<td style="text-align:left;">
-(Speg.) J.E.Wright &amp; V.L.Suárez
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.000000
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
 </td>
 <td style="text-align:left;">
 Fungi
@@ -1062,13 +1194,169 @@ Agaricomycetes
 Agaricales
 </td>
 <td style="text-align:left;">
-Agaricaceae
+Entolomataceae
 </td>
 <td style="text-align:left;">
-Abstoma
+Clitopilus
 </td>
 <td style="text-align:left;">
-stuckertii
+Clitopilus piperitus
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2007
+</td>
+<td style="text-align:left;">
+Hebeloma albidulum Peck
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.000000
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.2500000
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+Fungi
+</td>
+<td style="text-align:left;">
+Basidiomycota
+</td>
+<td style="text-align:left;">
+Agaricomycetes
+</td>
+<td style="text-align:left;">
+Agaricales
+</td>
+<td style="text-align:left;">
+Hymenogastraceae
+</td>
+<td style="text-align:left;">
+Hebeloma
+</td>
+<td style="text-align:left;">
+Hebeloma albidulum
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2702
+</td>
+<td style="text-align:left;">
+Aspidella solitaria (Bull.) E.-J.Gilbert
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.000000
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0625000
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+Fungi
+</td>
+<td style="text-align:left;">
+Basidiomycota
+</td>
+<td style="text-align:left;">
+Agaricomycetes
+</td>
+<td style="text-align:left;">
+Agaricales
+</td>
+<td style="text-align:left;">
+Amanitaceae
+</td>
+<td style="text-align:left;">
+Aspidella
+</td>
+<td style="text-align:left;">
+Aspidella solitaria
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2598
+</td>
+<td style="text-align:left;">
+Clavaria fumosa Pers.
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.000000
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.1666667
 </td>
 <td style="text-align:right;">
 11
@@ -1079,28 +1367,67 @@ stuckertii
 <td style="text-align:right;">
 0
 </td>
-<td style="text-align:right;">
-0.3636364
+<td style="text-align:left;">
+Fungi
 </td>
-<td style="text-align:right;">
-7
+<td style="text-align:left;">
+Basidiomycota
 </td>
-<td style="text-align:right;">
-0
+<td style="text-align:left;">
+Agaricomycetes
 </td>
-<td style="text-align:right;">
-0
+<td style="text-align:left;">
+Agaricales
+</td>
+<td style="text-align:left;">
+Clavariaceae
+</td>
+<td style="text-align:left;">
+Clavaria
+</td>
+<td style="text-align:left;">
+Clavaria fumosa
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-Abstoma townei (Lloyd) Zeller
+2508
 </td>
 <td style="text-align:left;">
-Abstoma townei
+Phaeocollybia piceae A.H.Sm. &amp; Trappe
 </td>
-<td style="text-align:left;">
-(Lloyd) Zeller
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0.1111111
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.000000
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.2222222
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
 </td>
 <td style="text-align:left;">
 Fungi
@@ -1115,66 +1442,45 @@ Agaricomycetes
 Agaricales
 </td>
 <td style="text-align:left;">
-Agaricaceae
+Hymenogastraceae
 </td>
 <td style="text-align:left;">
-Abstoma
+Phaeocollybia
 </td>
 <td style="text-align:left;">
-townei
-</td>
-<td style="text-align:right;">
-18
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0.6111111
-</td>
-<td style="text-align:right;">
-8
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
+Phaeocollybia piceae
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-Acutocapillitium torrendii (Lloyd) P.Ponce de León
+1437
 </td>
 <td style="text-align:left;">
-Acutocapillitium torrendii
+Hygrophorus caespitosus Murrill
 </td>
-<td style="text-align:left;">
-(Lloyd) P.Ponce de León
+<td style="text-align:right;">
+2
 </td>
-<td style="text-align:left;">
-Fungi
+<td style="text-align:right;">
+0
 </td>
-<td style="text-align:left;">
-Basidiomycota
+<td style="text-align:right;">
+0.0000000
 </td>
-<td style="text-align:left;">
-Agaricomycetes
+<td style="text-align:right;">
+0
 </td>
-<td style="text-align:left;">
-Agaricales
+<td style="text-align:right;">
+0.000000
 </td>
-<td style="text-align:left;">
-Agaricaceae
+<td style="text-align:right;">
+0
 </td>
-<td style="text-align:left;">
-Acutocapillitium
+<td style="text-align:right;">
+0
 </td>
-<td style="text-align:left;">
-torrendii
+<td style="text-align:right;">
+0.5000000
 </td>
 <td style="text-align:right;">
 2
@@ -1185,29 +1491,6 @@ torrendii
 <td style="text-align:right;">
 0
 </td>
-<td style="text-align:right;">
-1.0000000
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Aeruginospora furfuracea E.Horak
-</td>
-<td style="text-align:left;">
-Aeruginospora furfuracea
-</td>
-<td style="text-align:left;">
-E.Horak
-</td>
 <td style="text-align:left;">
 Fungi
 </td>
@@ -1221,306 +1504,139 @@ Agaricomycetes
 Agaricales
 </td>
 <td style="text-align:left;">
-Tricholomataceae
+Hygrophoraceae
 </td>
 <td style="text-align:left;">
-Aeruginospora
+Hygrophorus
 </td>
 <td style="text-align:left;">
-furfuracea
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0.6666667
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Aeruginospora singularis Höhn.
-</td>
-<td style="text-align:left;">
-Aeruginospora singularis
-</td>
-<td style="text-align:left;">
-Höhn.
-</td>
-<td style="text-align:left;">
-Fungi
-</td>
-<td style="text-align:left;">
-Basidiomycota
-</td>
-<td style="text-align:left;">
-Agaricomycetes
-</td>
-<td style="text-align:left;">
-Agaricales
-</td>
-<td style="text-align:left;">
-Tricholomataceae
-</td>
-<td style="text-align:left;">
-Aeruginospora
-</td>
-<td style="text-align:left;">
-singularis
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1.0000000
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Agaricus abramsii Murrill
-</td>
-<td style="text-align:left;">
-Agaricus abramsii
-</td>
-<td style="text-align:left;">
-Murrill
-</td>
-<td style="text-align:left;">
-Fungi
-</td>
-<td style="text-align:left;">
-Basidiomycota
-</td>
-<td style="text-align:left;">
-Agaricomycetes
-</td>
-<td style="text-align:left;">
-Agaricales
-</td>
-<td style="text-align:left;">
-Agaricaceae
-</td>
-<td style="text-align:left;">
-Agaricus
-</td>
-<td style="text-align:left;">
-abramsii
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1.0000000
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Agaricus abruptibulbus Peck
-</td>
-<td style="text-align:left;">
-Agaricus abruptibulbus
-</td>
-<td style="text-align:left;">
-Peck
-</td>
-<td style="text-align:left;">
-Fungi
-</td>
-<td style="text-align:left;">
-Basidiomycota
-</td>
-<td style="text-align:left;">
-Agaricomycetes
-</td>
-<td style="text-align:left;">
-Agaricales
-</td>
-<td style="text-align:left;">
-Agaricaceae
-</td>
-<td style="text-align:left;">
-Agaricus
-</td>
-<td style="text-align:left;">
-abruptibulbus
-</td>
-<td style="text-align:right;">
-189
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0.1269841
-</td>
-<td style="text-align:right;">
-93
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
+Hygrophorus caespitosus
 </td>
 </tr>
 </tbody>
 </table>
 </div>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="tax.html#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#filter taxa based on collector bias</span></span>
-<span id="cb7-2"><a href="tax.html#cb7-2" aria-hidden="true" tabindex="-1"></a>agaricales_enrich2 <span class="ot">&lt;-</span> agaricales_enrich[agaricales_enrich<span class="sc">$</span>max_bias<span class="sc">&lt;=</span><span class="fl">0.75</span>,]</span>
-<span id="cb7-3"><a href="tax.html#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-4"><a href="tax.html#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">#filter for taxa with at least 5 total records</span></span>
-<span id="cb7-5"><a href="tax.html#cb7-5" aria-hidden="true" tabindex="-1"></a>agaricales_enrich3 <span class="ot">&lt;-</span> agaricales_enrich2[agaricales_enrich2<span class="sc">$</span>freq<span class="sc">&gt;=</span><span class="dv">5</span>,]</span>
-<span id="cb7-6"><a href="tax.html#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-7"><a href="tax.html#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co">#make rectangular cladogram</span></span>
-<span id="cb7-8"><a href="tax.html#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggtree)</span>
-<span id="cb7-9"><a href="tax.html#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb7-10"><a href="tax.html#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-11"><a href="tax.html#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="fu">trait_clado</span>(<span class="at">data=</span>agaricales_enrich3, <span class="at">trait_col=</span><span class="st">&quot;trait_ratio&quot;</span>, <span class="at">continuous=</span><span class="cn">TRUE</span>,</span>
-<span id="cb7-12"><a href="tax.html#cb7-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">ladderize=</span><span class="cn">TRUE</span>, <span class="at">layout=</span><span class="st">&quot;rectangular&quot;</span>, <span class="at">size=</span><span class="fl">1.5</span>,</span>
-<span id="cb7-13"><a href="tax.html#cb7-13" aria-hidden="true" tabindex="-1"></a>            <span class="at">formula =</span> <span class="sc">~</span>new_order<span class="sc">/</span>new_family<span class="sc">/</span>new_genus<span class="sc">/</span>new_name, <span class="at">show=</span><span class="dv">100</span>)<span class="sc">+</span><span class="co">#make tree</span></span>
-<span id="cb7-14"><a href="tax.html#cb7-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tiplab</span>(<span class="at">color =</span> <span class="st">&quot;black&quot;</span>, <span class="at">hjust =</span> <span class="dv">0</span>, <span class="at">offset =</span> <span class="fl">0.05</span>,</span>
-<span id="cb7-15"><a href="tax.html#cb7-15" aria-hidden="true" tabindex="-1"></a>              <span class="at">size =</span> <span class="fl">2.5</span>, <span class="at">fontface =</span> <span class="st">&quot;italic&quot;</span>) <span class="sc">+</span> <span class="co">#add species labels</span></span>
-<span id="cb7-16"><a href="tax.html#cb7-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tippoint</span>(<span class="at">shape=</span><span class="dv">15</span>, <span class="fu">aes</span>(<span class="at">color=</span>trait_ratio), <span class="at">size=</span><span class="fl">2.5</span>)<span class="sc">+</span><span class="co">#add tree tips</span></span>
-<span id="cb7-17"><a href="tax.html#cb7-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_gradientn</span>(<span class="at">colours=</span> <span class="fu">c</span>(<span class="st">&quot;cyan&quot;</span>, <span class="st">&quot;blue&quot;</span>, <span class="st">&quot;purple&quot;</span>, <span class="st">&quot;red&quot;</span>, <span class="st">&quot;orange&quot;</span>),</span>
-<span id="cb7-18"><a href="tax.html#cb7-18" aria-hidden="true" tabindex="-1"></a>                        <span class="at">name =</span> <span class="st">&quot;Fire-associated records enrichment&quot;</span>,</span>
-<span id="cb7-19"><a href="tax.html#cb7-19" aria-hidden="true" tabindex="-1"></a>                        <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">max</span>(agaricales_enrich<span class="sc">$</span>trait_ratio)<span class="sc">+</span></span>
-<span id="cb7-20"><a href="tax.html#cb7-20" aria-hidden="true" tabindex="-1"></a>                                   (<span class="fl">0.01</span><span class="sc">*</span><span class="fu">max</span>(agaricales_enrich<span class="sc">$</span>trait_ratio))),</span>
-<span id="cb7-21"><a href="tax.html#cb7-21" aria-hidden="true" tabindex="-1"></a>                        <span class="at">guide =</span> <span class="fu">guide_colourbar</span>(<span class="at">label.vjust =</span> <span class="fl">0.6</span>, </span>
-<span id="cb7-22"><a href="tax.html#cb7-22" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">label.position =</span> <span class="st">&quot;left&quot;</span>, </span>
-<span id="cb7-23"><a href="tax.html#cb7-23" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">label.theme =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>, <span class="at">colour =</span> <span class="st">&quot;black&quot;</span>, <span class="at">angle =</span> <span class="dv">0</span>), </span>
-<span id="cb7-24"><a href="tax.html#cb7-24" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">title.position =</span> <span class="st">&quot;right&quot;</span>, </span>
-<span id="cb7-25"><a href="tax.html#cb7-25" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">nbin=</span><span class="dv">100</span>, </span>
-<span id="cb7-26"><a href="tax.html#cb7-26" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">ticks.colour =</span> <span class="st">&quot;white&quot;</span>,</span>
-<span id="cb7-27"><a href="tax.html#cb7-27" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">draw.ulim =</span> <span class="cn">FALSE</span>, </span>
-<span id="cb7-28"><a href="tax.html#cb7-28" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">draw.llim =</span> <span class="cn">FALSE</span>, </span>
-<span id="cb7-29"><a href="tax.html#cb7-29" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">barwidth =</span> .<span class="dv">5</span>, </span>
-<span id="cb7-30"><a href="tax.html#cb7-30" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">barheight =</span> <span class="dv">14</span>))<span class="sc">+</span></span>
-<span id="cb7-31"><a href="tax.html#cb7-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">plot.margin=</span><span class="fu">margin</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>), </span>
-<span id="cb7-32"><a href="tax.html#cb7-32" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>, <span class="at">angle =</span> <span class="dv">270</span>),</span>
-<span id="cb7-33"><a href="tax.html#cb7-33" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.title.align =</span> <span class="fl">0.5</span>, </span>
-<span id="cb7-34"><a href="tax.html#cb7-34" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.position =</span> <span class="st">&quot;right&quot;</span>, </span>
-<span id="cb7-35"><a href="tax.html#cb7-35" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.justification =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="fl">0.5</span>),</span>
-<span id="cb7-36"><a href="tax.html#cb7-36" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.margin =</span> <span class="fu">margin</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>),</span>
-<span id="cb7-37"><a href="tax.html#cb7-37" aria-hidden="true" tabindex="-1"></a>        <span class="at">strip.text =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb7-38"><a href="tax.html#cb7-38" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.line.x.bottom =</span> <span class="fu">element_line</span>(),</span>
-<span id="cb7-39"><a href="tax.html#cb7-39" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.ticks.x =</span> <span class="fu">element_line</span>(),</span>
-<span id="cb7-40"><a href="tax.html#cb7-40" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>, <span class="at">color =</span> <span class="st">&quot;black&quot;</span>),</span>
-<span id="cb7-41"><a href="tax.html#cb7-41" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.title.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>, <span class="at">color =</span> <span class="st">&quot;black&quot;</span>,</span>
-<span id="cb7-42"><a href="tax.html#cb7-42" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">margin=</span><span class="fu">margin</span>(<span class="dv">2</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>)))<span class="sc">+</span></span>
-<span id="cb7-43"><a href="tax.html#cb7-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">name =</span> <span class="st">&quot;Taxonomic hierarchy&quot;</span>, </span>
-<span id="cb7-44"><a href="tax.html#cb7-44" aria-hidden="true" tabindex="-1"></a>                     <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">3.8</span>), </span>
-<span id="cb7-45"><a href="tax.html#cb7-45" aria-hidden="true" tabindex="-1"></a>                     <span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>), </span>
-<span id="cb7-46"><a href="tax.html#cb7-46" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;O&quot;</span>, <span class="st">&quot;F&quot;</span>, <span class="st">&quot;G&quot;</span>, <span class="st">&quot;S&quot;</span>))</span></code></pre></div>
-<div class="figure" style="text-align: center"><span id="fig:rect-clado"></span>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="tax.html#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#filter out taxa with high collector bias (optional)</span></span>
+<span id="cb6-2"><a href="tax.html#cb6-2" aria-hidden="true" tabindex="-1"></a>agaricales_enrich <span class="ot">&lt;-</span> agaricales_enrich[agaricales_enrich<span class="sc">$</span>max_bias<span class="sc">&lt;=</span><span class="fl">0.75</span>,]</span>
+<span id="cb6-3"><a href="tax.html#cb6-3" aria-hidden="true" tabindex="-1"></a>agaricales_enrich <span class="ot">&lt;-</span> agaricales_enrich[agaricales_enrich<span class="sc">$</span>max_bias_t<span class="sc">&lt;=</span><span class="fl">0.75</span>,]</span>
+<span id="cb6-4"><a href="tax.html#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="tax.html#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">#filter out taxa with low total records (&quot;freq&quot;)</span></span>
+<span id="cb6-6"><a href="tax.html#cb6-6" aria-hidden="true" tabindex="-1"></a>agaricales_enrich <span class="ot">&lt;-</span> agaricales_enrich[agaricales_enrich<span class="sc">$</span>freq<span class="sc">&gt;=</span><span class="dv">3</span>,]</span>
+<span id="cb6-7"><a href="tax.html#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="tax.html#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">#make cladogram</span></span>
+<span id="cb6-9"><a href="tax.html#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggtree)</span>
+<span id="cb6-10"><a href="tax.html#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb6-11"><a href="tax.html#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="fu">trait_clado</span>(<span class="at">data=</span>agaricales_enrich, <span class="at">continuous=</span><span class="st">&quot;color&quot;</span>,</span>
+<span id="cb6-12"><a href="tax.html#cb6-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">ladderize=</span><span class="cn">TRUE</span>, <span class="at">layout=</span><span class="st">&quot;rectangular&quot;</span>, <span class="at">size=</span><span class="fl">1.2</span>,</span>
+<span id="cb6-13"><a href="tax.html#cb6-13" aria-hidden="true" tabindex="-1"></a>            <span class="at">formula =</span> <span class="sc">~</span>new_order<span class="sc">/</span>new_family<span class="sc">/</span>new_genus<span class="sc">/</span>new_species,</span>
+<span id="cb6-14"><a href="tax.html#cb6-14" aria-hidden="true" tabindex="-1"></a>            <span class="at">filter=</span><span class="st">&quot;high-100-trait_ratio&quot;</span>, <span class="at">node_all =</span> <span class="cn">TRUE</span>)<span class="sc">+</span></span>
+<span id="cb6-15"><a href="tax.html#cb6-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tiplab</span>(<span class="at">color =</span> <span class="st">&quot;black&quot;</span>, <span class="at">hjust =</span> <span class="dv">0</span>, <span class="at">offset =</span> <span class="fl">0.1</span>,</span>
+<span id="cb6-16"><a href="tax.html#cb6-16" aria-hidden="true" tabindex="-1"></a>               <span class="at">size =</span> <span class="fl">2.5</span>, <span class="at">fontface =</span> <span class="st">&quot;italic&quot;</span>) <span class="sc">+</span> <span class="co">#add species labels</span></span>
+<span id="cb6-17"><a href="tax.html#cb6-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tippoint</span>(<span class="at">shape=</span><span class="dv">20</span>,</span>
+<span id="cb6-18"><a href="tax.html#cb6-18" aria-hidden="true" tabindex="-1"></a>                <span class="fu">aes</span>(<span class="at">color=</span>trait_ratio, <span class="at">size=</span>trait_freq),</span>
+<span id="cb6-19"><a href="tax.html#cb6-19" aria-hidden="true" tabindex="-1"></a>                <span class="at">alpha=</span><span class="fl">0.75</span>)<span class="sc">+</span><span class="co">#add tree tips</span></span>
+<span id="cb6-20"><a href="tax.html#cb6-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_gradientn</span>(<span class="at">colours=</span> <span class="fu">c</span>(<span class="st">&quot;cyan&quot;</span>, <span class="st">&quot;blue&quot;</span>, <span class="st">&quot;purple&quot;</span>, <span class="st">&quot;red&quot;</span>, <span class="st">&quot;orange&quot;</span>),</span>
+<span id="cb6-21"><a href="tax.html#cb6-21" aria-hidden="true" tabindex="-1"></a>                        <span class="at">name =</span> <span class="st">&quot;Fire-associated records enrichment&quot;</span>,</span>
+<span id="cb6-22"><a href="tax.html#cb6-22" aria-hidden="true" tabindex="-1"></a>                        <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">round</span>(<span class="fu">max</span>(agaricales_enrich<span class="sc">$</span>trait_ratio),<span class="dv">2</span>)),</span>
+<span id="cb6-23"><a href="tax.html#cb6-23" aria-hidden="true" tabindex="-1"></a>                        <span class="at">guide =</span> <span class="fu">guide_colourbar</span>(<span class="at">label.vjust =</span> <span class="fl">0.6</span>,</span>
+<span id="cb6-24"><a href="tax.html#cb6-24" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">label.theme =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>,</span>
+<span id="cb6-25"><a href="tax.html#cb6-25" aria-hidden="true" tabindex="-1"></a>                                                                           <span class="at">colour =</span> <span class="st">&quot;black&quot;</span>,</span>
+<span id="cb6-26"><a href="tax.html#cb6-26" aria-hidden="true" tabindex="-1"></a>                                                                           <span class="at">angle =</span> <span class="dv">0</span>),</span>
+<span id="cb6-27"><a href="tax.html#cb6-27" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">title.position =</span> <span class="st">&quot;top&quot;</span>,</span>
+<span id="cb6-28"><a href="tax.html#cb6-28" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">nbin=</span><span class="dv">100</span>,</span>
+<span id="cb6-29"><a href="tax.html#cb6-29" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">draw.ulim =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb6-30"><a href="tax.html#cb6-30" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">draw.llim =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb6-31"><a href="tax.html#cb6-31" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">barwidth =</span> <span class="dv">15</span>,</span>
+<span id="cb6-32"><a href="tax.html#cb6-32" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">barheight =</span> <span class="fl">0.5</span>))<span class="sc">+</span></span>
+<span id="cb6-33"><a href="tax.html#cb6-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_size</span>(<span class="at">name =</span> <span class="st">&quot;Fire-associated records&quot;</span>,</span>
+<span id="cb6-34"><a href="tax.html#cb6-34" aria-hidden="true" tabindex="-1"></a>             <span class="at">guide =</span> <span class="fu">guide_legend</span>(<span class="at">keywidth =</span> <span class="dv">2</span>,</span>
+<span id="cb6-35"><a href="tax.html#cb6-35" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">keyheight =</span> <span class="dv">1</span>,</span>
+<span id="cb6-36"><a href="tax.html#cb6-36" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">label.position =</span> <span class="st">&quot;bottom&quot;</span>,</span>
+<span id="cb6-37"><a href="tax.html#cb6-37" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">label.vjust =</span> <span class="fl">0.6</span>,</span>
+<span id="cb6-38"><a href="tax.html#cb6-38" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">label.theme =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>,</span>
+<span id="cb6-39"><a href="tax.html#cb6-39" aria-hidden="true" tabindex="-1"></a>                                                             <span class="at">colour =</span> <span class="st">&quot;black&quot;</span>,</span>
+<span id="cb6-40"><a href="tax.html#cb6-40" aria-hidden="true" tabindex="-1"></a>                                                             <span class="at">angle =</span> <span class="dv">0</span>),</span>
+<span id="cb6-41"><a href="tax.html#cb6-41" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">title.position =</span> <span class="st">&quot;top&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb6-42"><a href="tax.html#cb6-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">plot.margin=</span><span class="fu">margin</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>),</span>
+<span id="cb6-43"><a href="tax.html#cb6-43" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>, <span class="at">margin =</span> <span class="fu">margin</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>)),</span>
+<span id="cb6-44"><a href="tax.html#cb6-44" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.title.align =</span> <span class="fl">0.5</span>,</span>
+<span id="cb6-45"><a href="tax.html#cb6-45" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>,</span>
+<span id="cb6-46"><a href="tax.html#cb6-46" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.justification =</span> <span class="st">&quot;center&quot;</span>,</span>
+<span id="cb6-47"><a href="tax.html#cb6-47" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.margin =</span> <span class="fu">margin</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>),</span>
+<span id="cb6-48"><a href="tax.html#cb6-48" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">margin=</span><span class="fu">margin</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>)))<span class="sc">+</span></span>
+<span id="cb6-49"><a href="tax.html#cb6-49" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlim</span>(<span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">5</span>))</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:rect-clado"></span>
 <img src="fungarium_book_files/figure-html/rect-clado-1.png" alt="Cladogram showing fire-association enrichment for top 100 Agaricales species with the highest enrichment" width="50%" />
 <p class="caption">
 Figure 2.1: Cladogram showing fire-association enrichment for top 100 Agaricales species with the highest enrichment
 </p>
 </div>
 <p><strong>Example code for making circular trait cladogram:</strong></p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="tax.html#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#load sample enrichment data set for global Agaricales records</span></span>
-<span id="cb8-2"><a href="tax.html#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(agaricales_enrich)</span>
-<span id="cb8-3"><a href="tax.html#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-4"><a href="tax.html#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#filter taxa based on collector bias</span></span>
-<span id="cb8-5"><a href="tax.html#cb8-5" aria-hidden="true" tabindex="-1"></a>agaricales_enrich2 <span class="ot">&lt;-</span> agaricales_enrich[agaricales_enrich<span class="sc">$</span>max_bias<span class="sc">&lt;=</span><span class="fl">0.75</span>,]</span>
-<span id="cb8-6"><a href="tax.html#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-7"><a href="tax.html#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#filter for taxa with at least 5 total records</span></span>
-<span id="cb8-8"><a href="tax.html#cb8-8" aria-hidden="true" tabindex="-1"></a>agaricales_enrich3 <span class="ot">&lt;-</span> agaricales_enrich2[agaricales_enrich2<span class="sc">$</span>freq<span class="sc">&gt;=</span><span class="dv">5</span>,]</span>
-<span id="cb8-9"><a href="tax.html#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-10"><a href="tax.html#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#make circle cladogram</span></span>
-<span id="cb8-11"><a href="tax.html#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggtree)</span>
-<span id="cb8-12"><a href="tax.html#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb8-13"><a href="tax.html#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-14"><a href="tax.html#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="fu">trait_clado</span>(<span class="at">data=</span>agaricales_enrich3, <span class="at">trait_col=</span><span class="st">&quot;trait_ratio&quot;</span>, <span class="at">continuous=</span><span class="cn">TRUE</span>,</span>
-<span id="cb8-15"><a href="tax.html#cb8-15" aria-hidden="true" tabindex="-1"></a>            <span class="at">ladderize=</span><span class="cn">TRUE</span>, <span class="at">layout=</span><span class="st">&quot;circular&quot;</span>, <span class="at">size=</span><span class="fl">0.8</span>,</span>
-<span id="cb8-16"><a href="tax.html#cb8-16" aria-hidden="true" tabindex="-1"></a>            <span class="at">formula =</span> <span class="sc">~</span>new_order<span class="sc">/</span>new_family<span class="sc">/</span>new_genus<span class="sc">/</span>new_name, <span class="at">show=</span><span class="dv">300</span>)<span class="sc">+</span><span class="co">#make tree</span></span>
-<span id="cb8-17"><a href="tax.html#cb8-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tiplab2</span>(<span class="at">color =</span> <span class="st">&quot;black&quot;</span>, <span class="at">hjust =</span> <span class="dv">0</span>, <span class="at">offset =</span> <span class="fl">0.1</span>,</span>
-<span id="cb8-18"><a href="tax.html#cb8-18" aria-hidden="true" tabindex="-1"></a>               <span class="at">size =</span> <span class="fl">1.3</span>, <span class="at">fontface =</span> <span class="st">&quot;italic&quot;</span>) <span class="sc">+</span> <span class="co">#add species labels</span></span>
-<span id="cb8-19"><a href="tax.html#cb8-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tippoint</span>(<span class="at">shape=</span><span class="dv">20</span>, </span>
-<span id="cb8-20"><a href="tax.html#cb8-20" aria-hidden="true" tabindex="-1"></a>                <span class="fu">aes</span>(<span class="at">color=</span>trait_ratio, <span class="at">size=</span>trait_freq), </span>
-<span id="cb8-21"><a href="tax.html#cb8-21" aria-hidden="true" tabindex="-1"></a>                <span class="at">alpha=</span><span class="fl">0.75</span>)<span class="sc">+</span><span class="co">#add tree tips</span></span>
-<span id="cb8-22"><a href="tax.html#cb8-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_gradientn</span>(<span class="at">colours=</span> <span class="fu">c</span>(<span class="st">&quot;cyan&quot;</span>, <span class="st">&quot;blue&quot;</span>, <span class="st">&quot;purple&quot;</span>, <span class="st">&quot;red&quot;</span>, <span class="st">&quot;orange&quot;</span>),</span>
-<span id="cb8-23"><a href="tax.html#cb8-23" aria-hidden="true" tabindex="-1"></a>                        <span class="at">name =</span> <span class="st">&quot;Fire-associated records enrichment&quot;</span>,</span>
-<span id="cb8-24"><a href="tax.html#cb8-24" aria-hidden="true" tabindex="-1"></a>                        <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">max</span>(agaricales_enrich<span class="sc">$</span>trait_ratio)<span class="sc">+</span></span>
-<span id="cb8-25"><a href="tax.html#cb8-25" aria-hidden="true" tabindex="-1"></a>                                   (<span class="fl">0.01</span><span class="sc">*</span><span class="fu">max</span>(agaricales_enrich<span class="sc">$</span>trait_ratio))),</span>
-<span id="cb8-26"><a href="tax.html#cb8-26" aria-hidden="true" tabindex="-1"></a>                        <span class="at">guide =</span> <span class="fu">guide_colourbar</span>(<span class="at">label.vjust =</span> <span class="fl">0.6</span>,</span>
-<span id="cb8-27"><a href="tax.html#cb8-27" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">label.theme =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>, <span class="at">colour =</span> <span class="st">&quot;black&quot;</span>, <span class="at">angle =</span> <span class="dv">0</span>),</span>
-<span id="cb8-28"><a href="tax.html#cb8-28" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">title.position =</span> <span class="st">&quot;top&quot;</span>,</span>
-<span id="cb8-29"><a href="tax.html#cb8-29" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">nbin=</span><span class="dv">100</span>,</span>
-<span id="cb8-30"><a href="tax.html#cb8-30" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">draw.ulim =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb8-31"><a href="tax.html#cb8-31" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">draw.llim =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb8-32"><a href="tax.html#cb8-32" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">barwidth =</span> <span class="dv">15</span>,</span>
-<span id="cb8-33"><a href="tax.html#cb8-33" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">barheight =</span> <span class="fl">0.5</span>))<span class="sc">+</span></span>
-<span id="cb8-34"><a href="tax.html#cb8-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_size</span>(<span class="at">name =</span> <span class="st">&quot;Fire-associated records&quot;</span>,</span>
-<span id="cb8-35"><a href="tax.html#cb8-35" aria-hidden="true" tabindex="-1"></a>             <span class="at">guide =</span> <span class="fu">guide_legend</span>(<span class="at">keywidth =</span> <span class="dv">2</span>,</span>
-<span id="cb8-36"><a href="tax.html#cb8-36" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">keyheight =</span> <span class="dv">1</span>,</span>
-<span id="cb8-37"><a href="tax.html#cb8-37" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">label.position =</span> <span class="st">&quot;bottom&quot;</span>,</span>
-<span id="cb8-38"><a href="tax.html#cb8-38" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">label.vjust =</span> <span class="fl">0.6</span>,</span>
-<span id="cb8-39"><a href="tax.html#cb8-39" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">label.theme =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>, <span class="at">colour =</span> <span class="st">&quot;black&quot;</span>, <span class="at">angle =</span> <span class="dv">0</span>),</span>
-<span id="cb8-40"><a href="tax.html#cb8-40" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">title.position =</span> <span class="st">&quot;top&quot;</span>)) <span class="sc">+</span></span>
-<span id="cb8-41"><a href="tax.html#cb8-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">plot.margin=</span><span class="fu">margin</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>),</span>
-<span id="cb8-42"><a href="tax.html#cb8-42" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>, <span class="at">margin =</span> <span class="fu">margin</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>)),</span>
-<span id="cb8-43"><a href="tax.html#cb8-43" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.title.align =</span> <span class="fl">0.5</span>,</span>
-<span id="cb8-44"><a href="tax.html#cb8-44" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>,</span>
-<span id="cb8-45"><a href="tax.html#cb8-45" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.justification =</span> <span class="st">&quot;center&quot;</span>,</span>
-<span id="cb8-46"><a href="tax.html#cb8-46" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.margin =</span> <span class="fu">margin</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>),</span>
-<span id="cb8-47"><a href="tax.html#cb8-47" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">margin=</span><span class="fu">margin</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>)))<span class="sc">+</span></span>
-<span id="cb8-48"><a href="tax.html#cb8-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlim</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">4</span>)<span class="co">#move root away from center;can help improve appearance of circle plot</span></span></code></pre></div>
-<div class="figure" style="text-align: center"><span id="fig:circle-clado"></span>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="tax.html#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#load sample enrichment data set</span></span>
+<span id="cb7-2"><a href="tax.html#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(agaricales_enrich)</span>
+<span id="cb7-3"><a href="tax.html#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="tax.html#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">#filter out taxa with high collector bias (optional)</span></span>
+<span id="cb7-5"><a href="tax.html#cb7-5" aria-hidden="true" tabindex="-1"></a>agaricales_enrich <span class="ot">&lt;-</span> agaricales_enrich[agaricales_enrich<span class="sc">$</span>max_bias<span class="sc">&lt;=</span><span class="fl">0.75</span>,]</span>
+<span id="cb7-6"><a href="tax.html#cb7-6" aria-hidden="true" tabindex="-1"></a>agaricales_enrich <span class="ot">&lt;-</span> agaricales_enrich[agaricales_enrich<span class="sc">$</span>max_bias_t<span class="sc">&lt;=</span><span class="fl">0.75</span>,]</span>
+<span id="cb7-7"><a href="tax.html#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="tax.html#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co">#filter out taxa with low total records (&quot;freq&quot;)</span></span>
+<span id="cb7-9"><a href="tax.html#cb7-9" aria-hidden="true" tabindex="-1"></a>agaricales_enrich <span class="ot">&lt;-</span> agaricales_enrich[agaricales_enrich<span class="sc">$</span>freq<span class="sc">&gt;=</span><span class="dv">3</span>,]</span>
+<span id="cb7-10"><a href="tax.html#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="tax.html#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">#make cladogram</span></span>
+<span id="cb7-12"><a href="tax.html#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggtree)</span>
+<span id="cb7-13"><a href="tax.html#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb7-14"><a href="tax.html#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="fu">trait_clado</span>(<span class="at">data=</span>agaricales_enrich, <span class="at">continuous=</span><span class="st">&quot;color&quot;</span>,</span>
+<span id="cb7-15"><a href="tax.html#cb7-15" aria-hidden="true" tabindex="-1"></a>            <span class="at">ladderize=</span><span class="cn">TRUE</span>, <span class="at">layout=</span><span class="st">&quot;circular&quot;</span>, <span class="at">size=</span><span class="fl">0.8</span>,</span>
+<span id="cb7-16"><a href="tax.html#cb7-16" aria-hidden="true" tabindex="-1"></a>            <span class="at">formula =</span> <span class="sc">~</span>new_order<span class="sc">/</span>new_family<span class="sc">/</span>new_genus<span class="sc">/</span>new_species,</span>
+<span id="cb7-17"><a href="tax.html#cb7-17" aria-hidden="true" tabindex="-1"></a>            <span class="at">filter=</span><span class="st">&quot;high-300-trait_ratio&quot;</span>, <span class="at">node_all =</span> <span class="cn">TRUE</span>)<span class="sc">+</span></span>
+<span id="cb7-18"><a href="tax.html#cb7-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tiplab2</span>(<span class="at">color =</span> <span class="st">&quot;black&quot;</span>, <span class="at">hjust =</span> <span class="dv">0</span>, <span class="at">offset =</span> <span class="fl">0.1</span>,</span>
+<span id="cb7-19"><a href="tax.html#cb7-19" aria-hidden="true" tabindex="-1"></a>               <span class="at">size =</span> <span class="fl">1.4</span>, <span class="at">fontface =</span> <span class="st">&quot;italic&quot;</span>) <span class="sc">+</span> <span class="co">#add species labels</span></span>
+<span id="cb7-20"><a href="tax.html#cb7-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tippoint</span>(<span class="at">shape=</span><span class="dv">20</span>,</span>
+<span id="cb7-21"><a href="tax.html#cb7-21" aria-hidden="true" tabindex="-1"></a>                <span class="fu">aes</span>(<span class="at">color=</span>trait_ratio, <span class="at">size=</span>trait_freq),</span>
+<span id="cb7-22"><a href="tax.html#cb7-22" aria-hidden="true" tabindex="-1"></a>                <span class="at">alpha=</span><span class="fl">0.75</span>)<span class="sc">+</span><span class="co">#add tree tips</span></span>
+<span id="cb7-23"><a href="tax.html#cb7-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_gradientn</span>(<span class="at">colours=</span> <span class="fu">c</span>(<span class="st">&quot;cyan&quot;</span>, <span class="st">&quot;blue&quot;</span>, <span class="st">&quot;purple&quot;</span>, <span class="st">&quot;red&quot;</span>, <span class="st">&quot;orange&quot;</span>),</span>
+<span id="cb7-24"><a href="tax.html#cb7-24" aria-hidden="true" tabindex="-1"></a>                        <span class="at">name =</span> <span class="st">&quot;Fire-associated records enrichment&quot;</span>,</span>
+<span id="cb7-25"><a href="tax.html#cb7-25" aria-hidden="true" tabindex="-1"></a>                        <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">round</span>(<span class="fu">max</span>(agaricales_enrich<span class="sc">$</span>trait_ratio),<span class="dv">2</span>)),</span>
+<span id="cb7-26"><a href="tax.html#cb7-26" aria-hidden="true" tabindex="-1"></a>                        <span class="at">guide =</span> <span class="fu">guide_colourbar</span>(<span class="at">label.vjust =</span> <span class="fl">0.6</span>,</span>
+<span id="cb7-27"><a href="tax.html#cb7-27" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">label.theme =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>,</span>
+<span id="cb7-28"><a href="tax.html#cb7-28" aria-hidden="true" tabindex="-1"></a>                                                                           <span class="at">colour =</span> <span class="st">&quot;black&quot;</span>,</span>
+<span id="cb7-29"><a href="tax.html#cb7-29" aria-hidden="true" tabindex="-1"></a>                                                                           <span class="at">angle =</span> <span class="dv">0</span>),</span>
+<span id="cb7-30"><a href="tax.html#cb7-30" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">title.position =</span> <span class="st">&quot;top&quot;</span>,</span>
+<span id="cb7-31"><a href="tax.html#cb7-31" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">nbin=</span><span class="dv">100</span>,</span>
+<span id="cb7-32"><a href="tax.html#cb7-32" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">draw.ulim =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb7-33"><a href="tax.html#cb7-33" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">draw.llim =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb7-34"><a href="tax.html#cb7-34" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">barwidth =</span> <span class="dv">15</span>,</span>
+<span id="cb7-35"><a href="tax.html#cb7-35" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">barheight =</span> <span class="fl">0.5</span>))<span class="sc">+</span></span>
+<span id="cb7-36"><a href="tax.html#cb7-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_size</span>(<span class="at">name =</span> <span class="st">&quot;Fire-associated records&quot;</span>,</span>
+<span id="cb7-37"><a href="tax.html#cb7-37" aria-hidden="true" tabindex="-1"></a>             <span class="at">guide =</span> <span class="fu">guide_legend</span>(<span class="at">keywidth =</span> <span class="dv">2</span>,</span>
+<span id="cb7-38"><a href="tax.html#cb7-38" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">keyheight =</span> <span class="dv">1</span>,</span>
+<span id="cb7-39"><a href="tax.html#cb7-39" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">label.position =</span> <span class="st">&quot;bottom&quot;</span>,</span>
+<span id="cb7-40"><a href="tax.html#cb7-40" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">label.vjust =</span> <span class="fl">0.6</span>,</span>
+<span id="cb7-41"><a href="tax.html#cb7-41" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">label.theme =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>,</span>
+<span id="cb7-42"><a href="tax.html#cb7-42" aria-hidden="true" tabindex="-1"></a>                                                             <span class="at">colour =</span> <span class="st">&quot;black&quot;</span>,</span>
+<span id="cb7-43"><a href="tax.html#cb7-43" aria-hidden="true" tabindex="-1"></a>                                                             <span class="at">angle =</span> <span class="dv">0</span>),</span>
+<span id="cb7-44"><a href="tax.html#cb7-44" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">title.position =</span> <span class="st">&quot;top&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb7-45"><a href="tax.html#cb7-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">plot.margin=</span><span class="fu">margin</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>),</span>
+<span id="cb7-46"><a href="tax.html#cb7-46" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>, <span class="at">margin =</span> <span class="fu">margin</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>)),</span>
+<span id="cb7-47"><a href="tax.html#cb7-47" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.title.align =</span> <span class="fl">0.5</span>,</span>
+<span id="cb7-48"><a href="tax.html#cb7-48" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>,</span>
+<span id="cb7-49"><a href="tax.html#cb7-49" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.justification =</span> <span class="st">&quot;center&quot;</span>,</span>
+<span id="cb7-50"><a href="tax.html#cb7-50" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.margin =</span> <span class="fu">margin</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>),</span>
+<span id="cb7-51"><a href="tax.html#cb7-51" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">margin=</span><span class="fu">margin</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>)))<span class="sc">+</span></span>
+<span id="cb7-52"><a href="tax.html#cb7-52" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlim</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">4</span>))</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:circle-clado"></span>
 <img src="fungarium_book_files/figure-html/circle-clado-1.png" alt="Circle cladogram showing fire-association enrichment for the top 300 Agaricales species with the highest enrichment" width="100%" />
 <p class="caption">
 Figure 2.2: Circle cladogram showing fire-association enrichment for the top 300 Agaricales species with the highest enrichment
 </p>
 </div>
 
+</div>
+</div>
+<h3>References</h3>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-fungarium2021" class="csl-entry">
+Simpson, H. J., and J. S. Schilling. 2021. <span>“Using Aggregated Field Collection Data and the Novel r Package FUNGARIUM to Investigate Fungal Fire Association.”</span> <em>Mycologia</em>.
 </div>
 </div>
             </section>
@@ -1533,7 +1649,6 @@ Figure 2.2: Circle cladogram showing fire-association enrichment for the top 300
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
-<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
 <script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
 <script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
 <script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
@@ -1552,6 +1667,7 @@ gitbook.start({
 "weibo": false,
 "instapaper": false,
 "vk": false,
+"whatsapp": false,
 "all": null
 },
 "fontsettings": {
@@ -1569,6 +1685,10 @@ gitbook.start({
 "text": null
 },
 "download": null,
+"search": {
+"engine": "fuse",
+"options": null
+},
 "toc": {
 "collapse": "subsection"
 }

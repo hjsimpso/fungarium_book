@@ -11,14 +11,14 @@ After updating taxonomy, some records may now be classified outside of the taxon
 library(fungarium)
 
 #import sample data set
-data(strophariaceae) #global Strophariaceae records
+data(agaricales) #US agaricales records
 
-#see Table 2.1 for preview of Strophariaceae data set
+#see Table 2.1 for preview of agaricales data set
 ```
 
 ```{r stroph-tab, tidy=TRUE, echo=FALSE}
 table1 <- knitr::kable(
-  head(strophariaceae, 10), caption = 'Preview of Strophariaceae data set',
+  head(agaricales, 10), caption = 'Preview of agaricales data set',
   booktabs = TRUE, format = "html"
 )
 kableExtra::scroll_box(kableExtra::kable_styling(table1), width = "100%", height = "300px")
@@ -26,13 +26,14 @@ kableExtra::scroll_box(kableExtra::kable_styling(table1), width = "100%", height
 
 ```{r taxon_name_update, include=TRUE, eval=FALSE, echo=TRUE}
 #update names and classification
-data <- taxon_update(strophariaceae, species_only=TRUE, show_status=FALSE) 
-
-#remove records no longer classified in Strophariaceae
-data2 <- data[data$new_family=="Strophariaceae",] 
+data <- taxon_update(agaricales, species_only=TRUE, show_status=FALSE)
 
 #remove records with taxon names that could not be updated or confirmed
-data3 <- data2[data2$new_name!="",]
+data2 <- data[data$new_species!="",]
+
+#remove records no longer classified in agaricales
+data3 <- data2[data2$new_order=="Agaricales",] 
+
 ```
 
 Note that taxon name updating and filtering was done prior to the taxonomic, geographic, and temporal analyses done by @fungarium2021. This is not necessarily required for geographic and temporal analyses; however, you run the risk of including "bad taxa" (i.e. taxa that are not actually classified within your originally specified taxonomic group) in your analyses. Thus, it is recommended to update taxon names and filter before performing any downstream analyses.
@@ -51,15 +52,15 @@ string2 <- "(?i)un.?burn(t|ed)"
 
 #filter out records that do not contain any environmental metadata (optional)
 #note that "host" is no longer present in new MyCoPortal data sets; see find_trait documentation
-data4 <- data3[data3$occurrenceRemarks!=""|data3$host!=""|
-                   data3$habitat!=""|data3$substrate!="",]
+data4 <- data3[data3$occurrenceRemarks!=""|data3$associatedTaxa!=""|
+                   data3$habitat!="",]
 
 #find trait-relevant records
-trait_data <- find_trait(data4, c("occurrenceRemarks", "host", "habitat", "substrate"),
+trait_data <- find_trait(data4,
                          pos_string=string1, neg_string=string2)
 
 #get trait enrichment
-trait_enrichment <- enrichment(all_rec=data, trait_rec=trait_data, status_feed=FALSE)
+trait_enrichment <- enrichment(all_rec=data, trait_rec=trait_data, coll_bias=TRUE, status_feed=FALSE)
 
 #filter taxa based on collector bias (optional)
 trait_enrichment <- trait_enrichment[trait_enrichment$max_bias<=0.75,]
@@ -88,7 +89,7 @@ data(agaricales_enrich)
 
 ```{r agar-tab, tidy=TRUE, echo=FALSE}
 table1 <- knitr::kable(
-  head(agaricales_enrich, 10), caption = 'Preview of Agaricales enrichment data set',
+  head(agaricales_enrich[sample(1:nrow(agaricales_enrich),100),], 10), caption = 'Preview of Agaricales enrichment data set',
   booktabs = TRUE, format = "html"
 )
 kableExtra::scroll_box(kableExtra::kable_styling(table1), width = "100%", height = "300px")
@@ -96,85 +97,32 @@ kableExtra::scroll_box(kableExtra::kable_styling(table1), width = "100%", height
 
 ```{r rect-clado, fig.cap='Cladogram showing fire-association enrichment for top 100 Agaricales species with the highest enrichment', out.width='50%', fig.asp=2, fig.align='center', eval=TRUE, message=FALSE, warning=FALSE, dpi=300}
 
-#filter taxa based on collector bias
-agaricales_enrich2 <- agaricales_enrich[agaricales_enrich$max_bias<=0.75,]
+#filter out taxa with high collector bias (optional)
+agaricales_enrich <- agaricales_enrich[agaricales_enrich$max_bias<=0.75,]
+agaricales_enrich <- agaricales_enrich[agaricales_enrich$max_bias_t<=0.75,]
 
-#filter for taxa with at least 5 total records
-agaricales_enrich3 <- agaricales_enrich2[agaricales_enrich2$freq>=5,]
+#filter out taxa with low total records ("freq")
+agaricales_enrich <- agaricales_enrich[agaricales_enrich$freq>=3,]
 
-#make rectangular cladogram
+#make cladogram
 library(ggtree)
 library(ggplot2)
-
-trait_clado(data=agaricales_enrich3, trait_col="trait_ratio", continuous=TRUE,
-            ladderize=TRUE, layout="rectangular", size=1.5,
-            formula = ~new_order/new_family/new_genus/new_name, show=100)+#make tree
-  geom_tiplab(color = "black", hjust = 0, offset = 0.05,
-              size = 2.5, fontface = "italic") + #add species labels
-  geom_tippoint(shape=15, aes(color=trait_ratio), size=2.5)+#add tree tips
-  scale_color_gradientn(colours= c("cyan", "blue", "purple", "red", "orange"),
-                        name = "Fire-associated records enrichment",
-                        limits = c(0, max(agaricales_enrich$trait_ratio)+
-                                   (0.01*max(agaricales_enrich$trait_ratio))),
-                        guide = guide_colourbar(label.vjust = 0.6, 
-                                                label.position = "left", 
-                                                label.theme = element_text(size = 10, colour = "black", angle = 0), 
-                                                title.position = "right", 
-                                                nbin=100, 
-                                                ticks.colour = "white",
-                                                draw.ulim = FALSE, 
-                                                draw.llim = FALSE, 
-                                                barwidth = .5, 
-                                                barheight = 14))+
-  theme(plot.margin=margin(0,0,0,0), 
-        legend.title = element_text(size = 12, angle = 270),
-        legend.title.align = 0.5, 
-        legend.position = "right", 
-        legend.justification = c(0,0.5),
-        legend.margin = margin(0,0,0,0),
-        strip.text = element_blank(),
-        axis.line.x.bottom = element_line(),
-        axis.ticks.x = element_line(),
-        axis.text.x = element_text(size = 12, color = "black"),
-        axis.title.x = element_text(size = 12, color = "black",
-                                    margin=margin(2,0,0,0)))+
-  scale_x_continuous(name = "Taxonomic hierarchy", 
-                     limits = c(0, 3.8), 
-                     breaks = c(0, 1, 2, 3), 
-                     labels = c("O", "F", "G", "S"))
-
-```
-
-
-**Example code for making circular trait cladogram:**
-```{r circle-clado, fig.cap='Circle cladogram showing fire-association enrichment for the top 300 Agaricales species with the highest enrichment', out.width='100%', fig.asp=1, fig.align='center', eval=TRUE, message=FALSE, warning=FALSE, dpi=300}
-#load sample enrichment data set for global Agaricales records
-data(agaricales_enrich)
-
-#filter taxa based on collector bias
-agaricales_enrich2 <- agaricales_enrich[agaricales_enrich$max_bias<=0.75,]
-
-#filter for taxa with at least 5 total records
-agaricales_enrich3 <- agaricales_enrich2[agaricales_enrich2$freq>=5,]
-
-#make circle cladogram
-library(ggtree)
-library(ggplot2)
-
-trait_clado(data=agaricales_enrich3, trait_col="trait_ratio", continuous=TRUE,
-            ladderize=TRUE, layout="circular", size=0.8,
-            formula = ~new_order/new_family/new_genus/new_name, show=300)+#make tree
-  geom_tiplab2(color = "black", hjust = 0, offset = 0.1,
-               size = 1.3, fontface = "italic") + #add species labels
-  geom_tippoint(shape=20, 
-                aes(color=trait_ratio, size=trait_freq), 
+trait_clado(data=agaricales_enrich, continuous="color",
+            ladderize=TRUE, layout="rectangular", size=1.2,
+            formula = ~new_order/new_family/new_genus/new_species,
+            filter="high-100-trait_ratio", node_all = TRUE)+
+  geom_tiplab(color = "black", hjust = 0, offset = 0.1,
+               size = 2.5, fontface = "italic") + #add species labels
+  geom_tippoint(shape=20,
+                aes(color=trait_ratio, size=trait_freq),
                 alpha=0.75)+#add tree tips
   scale_color_gradientn(colours= c("cyan", "blue", "purple", "red", "orange"),
                         name = "Fire-associated records enrichment",
-                        limits = c(0, max(agaricales_enrich$trait_ratio)+
-                                   (0.01*max(agaricales_enrich$trait_ratio))),
+                        limits = c(0, round(max(agaricales_enrich$trait_ratio),2)),
                         guide = guide_colourbar(label.vjust = 0.6,
-                                                label.theme = element_text(size = 10, colour = "black", angle = 0),
+                                                label.theme = element_text(size = 10,
+                                                                           colour = "black",
+                                                                           angle = 0),
                                                 title.position = "top",
                                                 nbin=100,
                                                 draw.ulim = FALSE,
@@ -186,7 +134,9 @@ trait_clado(data=agaricales_enrich3, trait_col="trait_ratio", continuous=TRUE,
                                   keyheight = 1,
                                   label.position = "bottom",
                                   label.vjust = 0.6,
-                                  label.theme = element_text(size = 10, colour = "black", angle = 0),
+                                  label.theme = element_text(size = 10,
+                                                             colour = "black",
+                                                             angle = 0),
                                   title.position = "top")) +
   theme(plot.margin=margin(0,0,0,0),
         legend.title = element_text(size = 10, margin = margin(0,0,0,0)),
@@ -195,6 +145,64 @@ trait_clado(data=agaricales_enrich3, trait_col="trait_ratio", continuous=TRUE,
         legend.justification = "center",
         legend.margin = margin(0,0,0,0),
         plot.title = element_text(hjust = 0.5, margin=margin(0,0,0,0)))+
-  xlim(-1,4)#move root away from center;can help improve appearance of circle plot
+  xlim(c(0,5))
+
+```
+
+
+**Example code for making circular trait cladogram:**
+```{r circle-clado, fig.cap='Circle cladogram showing fire-association enrichment for the top 300 Agaricales species with the highest enrichment', out.width='100%', fig.asp=1, fig.align='center', eval=TRUE, message=FALSE, warning=FALSE, dpi=300}
+#load sample enrichment data set
+data(agaricales_enrich)
+
+#filter out taxa with high collector bias (optional)
+agaricales_enrich <- agaricales_enrich[agaricales_enrich$max_bias<=0.75,]
+agaricales_enrich <- agaricales_enrich[agaricales_enrich$max_bias_t<=0.75,]
+
+#filter out taxa with low total records ("freq")
+agaricales_enrich <- agaricales_enrich[agaricales_enrich$freq>=3,]
+
+#make cladogram
+library(ggtree)
+library(ggplot2)
+trait_clado(data=agaricales_enrich, continuous="color",
+            ladderize=TRUE, layout="circular", size=0.8,
+            formula = ~new_order/new_family/new_genus/new_species,
+            filter="high-300-trait_ratio", node_all = TRUE)+
+  geom_tiplab2(color = "black", hjust = 0, offset = 0.1,
+               size = 1.4, fontface = "italic") + #add species labels
+  geom_tippoint(shape=20,
+                aes(color=trait_ratio, size=trait_freq),
+                alpha=0.75)+#add tree tips
+  scale_color_gradientn(colours= c("cyan", "blue", "purple", "red", "orange"),
+                        name = "Fire-associated records enrichment",
+                        limits = c(0, round(max(agaricales_enrich$trait_ratio),2)),
+                        guide = guide_colourbar(label.vjust = 0.6,
+                                                label.theme = element_text(size = 10,
+                                                                           colour = "black",
+                                                                           angle = 0),
+                                                title.position = "top",
+                                                nbin=100,
+                                                draw.ulim = FALSE,
+                                                draw.llim = FALSE,
+                                                barwidth = 15,
+                                                barheight = 0.5))+
+  scale_size(name = "Fire-associated records",
+             guide = guide_legend(keywidth = 2,
+                                  keyheight = 1,
+                                  label.position = "bottom",
+                                  label.vjust = 0.6,
+                                  label.theme = element_text(size = 10,
+                                                             colour = "black",
+                                                             angle = 0),
+                                  title.position = "top")) +
+  theme(plot.margin=margin(0,0,0,0),
+        legend.title = element_text(size = 10, margin = margin(0,0,0,0)),
+        legend.title.align = 0.5,
+        legend.position = "bottom",
+        legend.justification = "center",
+        legend.margin = margin(0,0,0,0),
+        plot.title = element_text(hjust = 0.5, margin=margin(0,0,0,0)))+
+  xlim(c(-1, 4))
 ```
 

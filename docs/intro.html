@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Chapter 1 Introduction | fungarium: Enabling the use of fungaria collections data for comprehensive trait analyses in R</title>
   <meta name="description" content="A guide to using fungarium for comprehensive analyses of ecological traits in fungi." />
-  <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
+  <meta name="generator" content="bookdown 0.24 and GitBook 2.6.7" />
 
   <meta property="og:title" content="Chapter 1 Introduction | fungarium: Enabling the use of fungaria collections data for comprehensive trait analyses in R" />
   <meta property="og:type" content="book" />
@@ -24,7 +24,7 @@
 <meta name="author" content="Hunter J. Simpson" />
 
 
-<meta name="date" content="2021-04-29" />
+<meta name="date" content="2022-01-10" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -33,8 +33,9 @@
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
 <link rel="prev" href="index.html"/>
 <link rel="next" href="tax.html"/>
-<script src="libs/header-attrs-2.7/header-attrs.js"></script>
-<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<script src="libs/header-attrs-2.11/header-attrs.js"></script>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -50,11 +51,10 @@
 
 
 
-
+<link href="libs/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.0.1/anchor-sections.js"></script>
 <script src="libs/kePrint-0.0.1/kePrint.js"></script>
 <link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
-<link href="libs/bsTable-3.3.7/bootstrapTable.min.css" rel="stylesheet" />
-<script src="libs/bsTable-3.3.7/bootstrapTable.js"></script>
 
 
 <style type="text/css">
@@ -122,6 +122,29 @@ code span.vs { color: #4070a0; } /* VerbatimString */
 code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
+<style type="text/css">
+/* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
 <link rel="stylesheet" href="style.css" type="text/css" />
 </head>
 
@@ -145,8 +168,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="1.2" data-path="intro.html"><a href="intro.html#getting-started"><i class="fa fa-check"></i><b>1.2</b> Getting started</a>
 <ul>
 <li class="chapter" data-level="1.2.1" data-path="intro.html"><a href="intro.html#installing-fungarium"><i class="fa fa-check"></i><b>1.2.1</b> Installing fungarium</a></li>
-<li class="chapter" data-level="1.2.2" data-path="intro.html"><a href="intro.html#installing-docker"><i class="fa fa-check"></i><b>1.2.2</b> Installing Docker</a></li>
-<li class="chapter" data-level="1.2.3" data-path="intro.html"><a href="intro.html#retrieving-mycoportal-data"><i class="fa fa-check"></i><b>1.2.3</b> Retrieving MyCoPortal data</a></li>
+<li class="chapter" data-level="1.2.2" data-path="intro.html"><a href="intro.html#retrieving-mycoportal-data"><i class="fa fa-check"></i><b>1.2.2</b> Retrieving MyCoPortal data</a></li>
+<li class="chapter" data-level="1.2.3" data-path="intro.html"><a href="intro.html#retrieving-gbif-data"><i class="fa fa-check"></i><b>1.2.3</b> Retrieving GBIF data</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="2" data-path="tax.html"><a href="tax.html"><i class="fa fa-check"></i><b>2</b> Taxonomic analysis</a>
@@ -183,10 +206,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h1><span class="header-section-number">Chapter 1</span> Introduction</h1>
 <div id="motivation" class="section level2" number="1.1">
 <h2><span class="header-section-number">1.1</span> Motivation</h2>
-<p>Fungaria collections and citizen science observations (e.g.,<a href="https://www.inaturalist.org">iNaturalist</a>, <a href="https://mushroomobserver.org">MushroomObserver</a>) typically contain taxonomic, geographic, and temporal information for each fungal specimen. Additionally, these records also often contain trait-relevant metadata about the host, habitat, or substrate associated with the collected or observed specimens; thus, these records are well-suited for comprehensive investigations into taxonomic, geographic, and temporal patterns of ecological traits. The first step in pursuing these investigations is accessing data and generating a data set. Citizen science platforms and many fungaria have online interfaces for downloading data from their respective databases. This is useful if you are only interested in the specimen records from one particular database; however, if you are interested in maximizing the size of your data set and conducting broad analyses the best approach would be to combine data from all available databases. This is effectively done automatically by the <a href="https://mycoportal.org">Mycology Collections Portal</a> (MyCoPortal) web interface. This interface allows users to access data from a wide variety of fungaria and citizen science platforms and then automatically aggregate the data from these different sources into one data set.</p>
-<p>While useful, MyCoPortal data does come with challenges. First, accessing data via the web interface can be a slow and inefficient process, especially if your analysis requires querying for multiple taxa, locations, years, etc. Second, the ability to find records with trait-relevant environmental metadata via the interface is extremely limited, considering that only one out of four metadata fields can be queried (i.e., “host”) and complex regular expressions (regex) cannot be used. Third, many taxon names are misspelled or are outdated (i.e., no longer reflect current scientific consensus). Fourth, location names are also often misspelled. All of these issues, affect the efficiency and accuracy of trait analyses.</p>
-<p>To overcome the challenges associated with MyCoPortal data, we created the <strong>fungarium</strong> package. This package contains a suite of functions aimed at enabling efficient, accurate, and comprehensive analyses of ecological traits in fungi.</p>
-<p>Note that while <strong>fungarium</strong> was created for use with MyCoPortal data, many of the functions are theoretically applicable to any data set containing taxonomic, geographic, and environmental information.</p>
+<p>Fungaria collections and citizen science observations (e.g.,<a href="https://www.inaturalist.org">iNaturalist</a>, <a href="https://mushroomobserver.org">MushroomObserver</a>) typically contain taxonomic, geographic, and temporal information for each fungal specimen. Additionally, these records also often contain trait-relevant metadata about the host, habitat, or substrate associated with the collected or observed specimens; thus, these records are well-suited for comprehensive investigations into taxonomic, geographic, and temporal patterns of ecological traits. The first step in pursuing these investigations is accessing data and generating a data set. Citizen science platforms and many fungaria have online interfaces for downloading data from their respective databases. This is useful if you are only interested in the specimen records from one particular database; however, if you are interested in maximizing the size of your data set and conducting broad analyses the best approach would be to combine data from all available databases. This is accomplished through online data aggregators like the <a href="https://mycoportal.org">Mycology Collections Portal</a> (MyCoPortal) and <a href="https://www.gbif.org/">Global Biodiversity Information Facility</a> (GBIF). These online interfaces allows users to access occurrence data from a wide variety of fungaria and citizen science platforms and then automatically aggregate the data from these different sources into one data set.</p>
+<p>Before using occurrence data for trait analyses, a variety of preprocessing steps may be necessary. Occurrence data sets, especially those that are large and temporally and geographically diverse, often contain errors or inconsistencies. For example, taxon names may be outdated (e.g., taxon has been placed in new genus), date information may be nonsensical or have inconsistent format, location names may be misspelled, and GPS coordinates may be nonsensical or have inconsistent format. Additionally, the web interfaces where the data were obtained offer limited capabilities for selecting trait-relevant records; therefore, occurrence data also needs to be processed to identify records associated with the trait of interest. To overcome these various issues and help enable comprehensive trait analyses, we created the <strong>fungarium</strong> package, which contains a suite of functions for handling taxon, date, and location issues as well as enabling the identification of trait-associated records.</p>
+<p>To complement these preprocessing tools and further facilitate trait analyses, the <strong>fungarium</strong> package also contains functions for adding FunGuild data to each record, assigning records to hexagonal grid cells for bounding “box” geographical analyses, visualizing taxonomic patterns of trait data in annotated cladograms, and visualizing geographic patterns of trait data in annotated maps.</p>
+<p>Note that many of the <strong>fungarium</strong> preprocessing tools were created primarily for use with MyCoPortal data which is in verbatim format (i.e., unaltered from the format it was in, when received from the data provider). These functions can be used with GBIF data as well, but be aware that GBIF using its own processing tools to fix issues (i.e., <a href="https://www.gbif.org/article/5i3CQEZ6DuWiycgMaaakCo/gbif-infrastructure-data-processing">interpretation</a>) within each record. To circumvent GBIF processing and use <strong>fungarium</strong> processing tools on your data instead, use the “verbatim” data file within the Darwwin Core Archive downloaded from GBIF. This file should not contain GBIF interpretations.</p>
 </div>
 <div id="getting-started" class="section level2" number="1.2">
 <h2><span class="header-section-number">1.2</span> Getting started</h2>
@@ -195,36 +218,22 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="intro.html#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">&quot;remotes&quot;</span>) <span class="co">#install &#39;remotes&#39; (if not already installed)</span></span>
 <span id="cb1-2"><a href="intro.html#cb1-2" aria-hidden="true" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;hjsimpso/fungarium@*release&quot;</span>) <span class="co">#install the latest fungarium release</span></span></code></pre></div>
 </div>
-<div id="installing-docker" class="section level3" number="1.2.2">
-<h3><span class="header-section-number">1.2.2</span> Installing Docker</h3>
-<p>Before using the <code>mycoportal_tab</code> function, <a href="https://docs.docker.com/get-started/overview/">Docker</a> should be installed and running on your system. No other function in the <strong>fungarium</strong> package requires Docker, so if you do not wish to utilize <code>mycoportal_tab</code> you do not need to install Docker.</p>
-<p>Instructions for installing Docker (available for Linux platforms, macOS, and Windows 10): <a href="https://docs.docker.com/engine/install/" class="uri">https://docs.docker.com/engine/install/</a></p>
-<p>To learn more about Docker and how it works, see: <a href="https://docs.docker.com/get-started/overview/" class="uri">https://docs.docker.com/get-started/overview/</a>. Note that you do not need to be fully familiar with every aspect of Docker to use <code>mycoportal_tab</code>. You simply need to install it and ensure that it is running.</p>
-</div>
-<div id="retrieving-mycoportal-data" class="section level3" number="1.2.3">
-<h3><span class="header-section-number">1.2.3</span> Retrieving MyCoPortal data</h3>
+<div id="retrieving-mycoportal-data" class="section level3" number="1.2.2">
+<h3><span class="header-section-number">1.2.2</span> Retrieving MyCoPortal data</h3>
 <p>Fungal collection/observation data can be retrieved from the MyCoPortal using <code>mycoportal_tab</code> within R or by manually downloading data from the MyCoPortal web interface at <a href="https://mycoportal.org" class="uri">https://mycoportal.org</a>.</p>
-<div id="mycoportal_tab" class="section level4" number="1.2.3.1">
-<h4><span class="header-section-number">1.2.3.1</span> mycoportal_tab</h4>
-<p>If you have installed Docker, you can use <code>mycoportal_tab</code> within R to retrieve data sets from the MyCoPortal:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="intro.html#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Load package</span></span>
-<span id="cb2-2"><a href="intro.html#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(fungarium) </span>
-<span id="cb2-3"><a href="intro.html#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="intro.html#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Query for all Pholiota records; download file into home directory</span></span>
-<span id="cb2-5"><a href="intro.html#cb2-5" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">mycoportal_tab</span>(<span class="fu">path.expand</span>(<span class="st">&quot;~&quot;</span>), <span class="st">&quot;Pholiota&quot;</span>,</span>
-<span id="cb2-6"><a href="intro.html#cb2-6" aria-hidden="true" tabindex="-1"></a>                            <span class="at">taxon_type=</span><span class="st">&quot;1&quot;</span>, <span class="at">read_files=</span><span class="cn">TRUE</span>,</span>
-<span id="cb2-7"><a href="intro.html#cb2-7" aria-hidden="true" tabindex="-1"></a>                            <span class="at">messages=</span><span class="cn">FALSE</span>, <span class="at">rec_numb=</span><span class="cn">FALSE</span>)</span>
-<span id="cb2-8"><a href="intro.html#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="intro.html#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">#Query for all Strophariaceae records; download file into home directory</span></span>
-<span id="cb2-10"><a href="intro.html#cb2-10" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">mycoportal_tab</span>(<span class="fu">path.expand</span>(<span class="st">&quot;~&quot;</span>), <span class="st">&quot;Strophariaceae&quot;</span>,</span>
-<span id="cb2-11"><a href="intro.html#cb2-11" aria-hidden="true" tabindex="-1"></a>                            <span class="at">taxon_type=</span><span class="st">&quot;2&quot;</span>, <span class="at">read_files=</span><span class="cn">TRUE</span>,</span>
-<span id="cb2-12"><a href="intro.html#cb2-12" aria-hidden="true" tabindex="-1"></a>                            <span class="at">messages=</span><span class="cn">FALSE</span>, <span class="at">rec_numb=</span><span class="cn">FALSE</span>)</span></code></pre></div>
+<div id="mycoportal_tab" class="section level4" number="1.2.2.1">
+<h4><span class="header-section-number">1.2.2.1</span> mycoportal_tab</h4>
+<p><code>mycoportal_tab</code> removed from package as of v2.0.0. Function was too difficult to maintain due to the instability of the mycoportal.org webpage layout. If mycoportal.org ever implements a true API, this function may return. Mycoportal records can still be downloaded manually from mycoportal.org</p>
 </div>
-<div id="mycoportal-web-interface" class="section level4" number="1.2.3.2">
-<h4><span class="header-section-number">1.2.3.2</span> MyCoPortal web interface</h4>
-<p>If you do not wish to use <code>mycoportal_tab</code> you can download MyCoPortal data sets manually from the web interface at <a href="https://mycoportal.org" class="uri">https://mycoportal.org</a>. You can enter the same query parameters (e.g., taxon, country, year, etc.) as those used in <code>mycoportal_tab</code>. When selecting download preferences, select “Tab Delimited” for File Format and “ISO-8859-1 (western)” for Character Set. Downloaded data sets can be imported into R via <code>read.delim</code> or <code>data.table::fread</code>.</p>
+<div id="mycoportal-web-interface" class="section level4" number="1.2.2.2">
+<h4><span class="header-section-number">1.2.2.2</span> MyCoPortal web interface</h4>
+<p>MyCoPortal data sets can be downloaded using the web interface at <a href="https://mycoportal.org" class="uri">https://mycoportal.org</a>. Various query parameters (e.g., taxon, country, year, etc.) can be used to select records of interest. When selecting download preferences, uncheck “Compressed ZIP file” then select “Darwin Core” for Structure, Tab Delimited” for File Format and “UTF-8 (unicode)” for Character Set. These file settings are necessary for data processing tools in the <strong>fungarium</strong> package to work properly. Downloaded data sets can be imported into R via <code>read.delim</code> or <code>data.table::fread</code>.</p>
+</div>
+</div>
+<div id="retrieving-gbif-data" class="section level3" number="1.2.3">
+<h3><span class="header-section-number">1.2.3</span> Retrieving GBIF data</h3>
+<p>Fungal collection/observation data can be retrieved from GBIF using the web interface at <a href="https://www.gbif.org/" class="uri">https://www.gbif.org/</a>. To take advance of <strong>fungarium</strong> processing tools, download your data sets in Darwin Core Archive format and use the “verbatim” data file within the archive. In some cases, you may also be able to retrieve records from within R using the <a href="https://github.com/ropensci/rgbif">rgbif</a> package (see package details).</p>
 
-</div>
 </div>
 </div>
 </div>
@@ -238,7 +247,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
-<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
 <script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
 <script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
 <script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
@@ -257,6 +265,7 @@ gitbook.start({
 "weibo": false,
 "instapaper": false,
 "vk": false,
+"whatsapp": false,
 "all": null
 },
 "fontsettings": {
@@ -274,6 +283,10 @@ gitbook.start({
 "text": null
 },
 "download": null,
+"search": {
+"engine": "fuse",
+"options": null
+},
 "toc": {
 "collapse": "subsection"
 }

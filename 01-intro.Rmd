@@ -2,13 +2,14 @@
 
 ## Motivation
 
-Fungaria collections and citizen science observations (e.g.,[iNaturalist](https://www.inaturalist.org), [MushroomObserver](https://mushroomobserver.org)) typically contain taxonomic, geographic, and temporal information for each fungal specimen. Additionally, these records also often contain trait-relevant metadata about the host, habitat, or substrate associated with the collected or observed specimens; thus, these records are well-suited for comprehensive investigations into taxonomic, geographic, and temporal patterns of ecological traits. The first step in pursuing these investigations is accessing data and generating a data set. Citizen science platforms and many fungaria have online interfaces for downloading data from their respective databases. This is useful if you are only interested in the specimen records from one particular database; however, if you are interested in maximizing the size of your data set and conducting broad analyses the best approach would be to combine data from all available databases. This is effectively done automatically by the [Mycology Collections Portal](https://mycoportal.org) (MyCoPortal) web interface. This interface allows users to access data from a wide variety of fungaria and citizen science platforms and then automatically aggregate the data from these different sources into one data set. 
+Fungaria collections and citizen science observations (e.g.,[iNaturalist](https://www.inaturalist.org), [MushroomObserver](https://mushroomobserver.org)) typically contain taxonomic, geographic, and temporal information for each fungal specimen. Additionally, these records also often contain trait-relevant metadata about the host, habitat, or substrate associated with the collected or observed specimens; thus, these records are well-suited for comprehensive investigations into taxonomic, geographic, and temporal patterns of ecological traits. The first step in pursuing these investigations is accessing data and generating a data set. Citizen science platforms and many fungaria have online interfaces for downloading data from their respective databases. This is useful if you are only interested in the specimen records from one particular database; however, if you are interested in maximizing the size of your data set and conducting broad analyses the best approach would be to combine data from all available databases. This is accomplished through online data aggregators like the [Mycology Collections Portal](https://mycoportal.org) (MyCoPortal) and [Global Biodiversity Information Facility](https://www.gbif.org/) (GBIF). These online interfaces allows users to access occurrence data from a wide variety of fungaria and citizen science platforms and then automatically aggregate the data from these different sources into one data set.
 
-While useful, MyCoPortal data does come with challenges. First, accessing data via the web interface can be a slow and inefficient process, especially if your analysis requires querying for multiple taxa, locations, years, etc. Second, the ability to find records with trait-relevant environmental metadata via the interface is extremely limited, considering that only one out of four metadata fields can be queried (i.e., "host") and complex regular expressions (regex) cannot be used. Third, many taxon names are misspelled or are outdated (i.e., no longer reflect current scientific consensus). Fourth, location names are also often misspelled. All of these issues, affect the efficiency and accuracy of trait analyses.
+Before using occurrence data for trait analyses, a variety of preprocessing steps may be necessary. Occurrence data sets, especially those that are large and temporally and geographically diverse, often contain errors or inconsistencies. For example, taxon names may be outdated (e.g., taxon has been placed in new genus), date information may be nonsensical or have inconsistent format, location names may be misspelled, and GPS coordinates may be nonsensical or have inconsistent format. Additionally, the web interfaces where the data were obtained offer limited capabilities for selecting trait-relevant records; therefore, occurrence data also needs to be processed to identify records associated with the trait of interest. To overcome these various issues and help enable comprehensive trait analyses, we created the **fungarium** package, which contains a suite of functions for handling taxon, date, and location issues as well as enabling the identification of trait-associated records.
 
-To overcome the challenges associated with MyCoPortal data, we created the **fungarium** package. This package contains a suite of functions aimed at enabling efficient, accurate, and comprehensive analyses of ecological traits in fungi.
+To complement these preprocessing tools and further facilitate trait analyses, the **fungarium** package also contains functions for adding FunGuild data to each record, assigning records to hexagonal grid cells for bounding "box" geographical analyses, visualizing taxonomic patterns of trait data in annotated cladograms, and visualizing geographic patterns of trait data in annotated maps.
 
-Note that while **fungarium** was created for use with MyCoPortal data, many of the functions are theoretically applicable to any data set containing taxonomic, geographic, and environmental information.
+Note that many of the **fungarium** preprocessing tools were created primarily for use with MyCoPortal data which is in verbatim format (i.e., unaltered from the format it was in, when received from the data provider). These functions can be used with GBIF data as well, but be aware that GBIF using its own processing tools to fix issues (i.e., [interpretation](https://www.gbif.org/article/5i3CQEZ6DuWiycgMaaakCo/gbif-infrastructure-data-processing)) within each record. To circumvent GBIF processing and use **fungarium** processing tools on your data instead, use the "verbatim" data file within the Darwwin Core Archive downloaded from GBIF. This file should not contain GBIF interpretations.
+
 
 ## Getting started
 
@@ -19,41 +20,21 @@ install.packages("remotes") #install 'remotes' (if not already installed)
 remotes::install_github("hjsimpso/fungarium@*release") #install the latest fungarium release
 ```
 
-### Installing Docker
-
-Before using the `mycoportal_tab` function, [Docker](https://docs.docker.com/get-started/overview/) should be installed and running on your system. No other function in the **fungarium** package requires Docker, so if you do not wish to utilize `mycoportal_tab` you do not need to install Docker.
-
-Instructions for installing Docker (available for Linux platforms, macOS, and Windows 10): https://docs.docker.com/engine/install/
-
-To learn more about Docker and how it works, see: https://docs.docker.com/get-started/overview/. Note that you do not need to be fully familiar with every aspect of Docker to use `mycoportal_tab`. You simply need to install it and ensure that it is running.
-
 ### Retrieving MyCoPortal data
 
 Fungal collection/observation data can be retrieved from the MyCoPortal using `mycoportal_tab` within R or by manually downloading data from the MyCoPortal web interface at https://mycoportal.org.
 
 #### mycoportal_tab
 
-If you have installed Docker, you can use `mycoportal_tab` within R to retrieve data sets from the MyCoPortal:
-
-```{r data_download, include=TRUE, eval=FALSE, echo=TRUE}
-#Load package
-library(fungarium) 
-
-#Query for all Pholiota records; download file into home directory
-data <- mycoportal_tab(path.expand("~"), "Pholiota",
-                            taxon_type="1", read_files=TRUE,
-                            messages=FALSE, rec_numb=FALSE)
-
-#Query for all Strophariaceae records; download file into home directory
-data <- mycoportal_tab(path.expand("~"), "Strophariaceae",
-                            taxon_type="2", read_files=TRUE,
-                            messages=FALSE, rec_numb=FALSE)
-```
+`mycoportal_tab` removed from package as of v2.0.0. Function was too difficult to maintain due to the instability of the mycoportal.org webpage layout. If mycoportal.org ever implements a true API, this function may return. Mycoportal records can still be downloaded manually from mycoportal.org
 
 #### MyCoPortal web interface
 
-If you do not wish to use `mycoportal_tab` you can download MyCoPortal data sets manually from the web interface at https://mycoportal.org. You can enter the same query parameters (e.g., taxon, country, year, etc.) as those used in `mycoportal_tab`. When selecting download preferences, select "Tab Delimited" for File Format and "ISO-8859-1 (western)" for Character Set. Downloaded data sets can be imported into R via `read.delim` or `data.table::fread`.
+MyCoPortal data sets can be downloaded using the web interface at https://mycoportal.org. Various query parameters (e.g., taxon, country, year, etc.) can be used to select records of interest. When selecting download preferences, uncheck "Compressed ZIP file" then select "Darwin Core" for Structure, Tab Delimited" for File Format and "UTF-8 (unicode)" for Character Set. These file settings are necessary for data processing tools in the **fungarium** package to work properly. Downloaded data sets can be imported into R via `read.delim` or `data.table::fread`.
 
+### Retrieving GBIF data
+
+Fungal collection/observation data can be retrieved from GBIF using the web interface at https://www.gbif.org/. To take advance of **fungarium** processing tools, download your data sets in Darwin Core Archive format and use the "verbatim" data file within the archive. In some cases, you may also be able to retrieve records from within R using the [rgbif](https://github.com/ropensci/rgbif) package (see package details).
 
 ```{r include=FALSE}
 # automatically create a bib database for R packages

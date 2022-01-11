@@ -2,6 +2,9 @@ tab:stroph-tab
 tab:agar-tab
 fig:rect-clado
 fig:circle-clado
+tab:agar2-tab
+fig:trait-map
+fig:US-map
 intro
 motivation
 getting-started
@@ -15,5 +18,9 @@ update-taxon-names-and-clean-up
 calculating-trait-enrichment-factors
 visualize-trait-enrichment-factors
 geo
+clean-coordinates
+assigning-records-to-geographic-grid-cells
+calculate-trait-enrichment-per-grid-cell
+visualize-trait-enrichment
 tem
 conc

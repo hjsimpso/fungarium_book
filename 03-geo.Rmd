@@ -1,3 +1,102 @@
 # Geographic analysis {#geo}
 
 Under construction...
+
+## Clean coordinates
+
+Some occurrence records may have invalid coordinates (e.g., not in decimal format, not between -180 and 180 [lon] or -90 and 90 [lat], not within the bounds of the country listed) or coordinates with suspicious validity (e.g., zero/zero coordinates, lat and long are equal, coordinates match the country centroid), and these issues must be dealt with before conducting geographical analyses. `coord_clean` can be used to remove bad coordinates using a variety of validity tests (see function details). Additionally, the number of digits can be specified for automatic rounding of coordinates.
+
+
+**Example code for cleaning coordinates:**
+```{r loadData-geo, include=TRUE, eval=TRUE, echo=TRUE}
+library(fungarium)
+
+#import sample data set
+data(agaricales_updated) #United States Agaricales records
+
+#see Table 2.1 for preview of agaricales data set
+```
+
+```{r agar2-tab, tidy=TRUE, echo=FALSE}
+table1 <- knitr::kable(
+  head(agaricales, 10), caption = 'Preview of agaricales data set',
+  booktabs = TRUE, format = "html"
+)
+kableExtra::scroll_box(kableExtra::kable_styling(table1), width = "100%", height = "300px")
+```
+
+```{r clean-coord, include=TRUE, eval=TRUE, echo=TRUE}
+#clean coordinates
+agaricales_cleaned <- coord_clean(agaricales_updated) 
+
+```
+
+
+## Assigning records to geographic grid cells
+
+Before plotting geographic trait data within bounding "boxes", record coordinates are used to assign each record to individual grid cells. `hex_grid` can be used to create a world map grid of hexagonal cells with a specific area (in square kilometers). See the code below for a demonstration on how to assign occurrence records to individual grid cells.
+
+**Example code  for finding trait records and calculating enrichment factors:**
+```{r assign-grid, include=TRUE, eval=TRUE, echo=TRUE}
+#make hex grid
+grid <- hex_grid(20000)
+
+#convert lat/long points to sf geometry
+agaricales_sf <- sf::st_as_sf(agaricales_cleaned,
+                              coords = c("decimalLongitude", "decimalLatitude"),
+                              crs = "+proj=latlong +ellps=WGS84 +datum=WGS84")
+
+#convert to cylindrical equal area projection coordinates
+agaricales_sf <- sf::st_transform(agaricales_sf,
+                                  crs = "+proj=cea +ellps=WGS84 +datum=WGS84")
+
+#assign points to grid cells
+agaricales_grid <- sf::st_join(grid, agaricales_sf, join=sf::st_contains, left=FALSE)
+
+```
+
+
+## Calculate trait enrichment per grid cell
+
+After assigning records to specific grid cells, trait enrichment can be calculated for each cell using the `enrichment` function. See code below for an example on calculating fire-associated enrichment.
+
+**Example code  for calculating enrichment factors:**
+```{r trait-enrich, include=TRUE, eval=TRUE, echo=TRUE}
+#find fire-associated records
+string1 <- "(?i)charred|burn(t|ed)|scorched|fire.?(killed|damaged|scarred)|killed.by.fire"
+string2 <- "(?i)un.?burn(t|ed)"
+trait_rec <- find_trait(agaricales_grid, pos_string=string1, neg_string=string2)
+
+#find fire-associated enrichment per grid cell
+fire_enrich <- enrichment(agaricales_grid, trait_rec, ext_var="geometry", by="hex")
+
+#filter out hex cells with low amount of occurrences
+fire_enrich <- fire_enrich[fire_enrich$freq>=5,]
+
+```
+
+## Visualize trait enrichment
+
+Once enrichment values have been calculated, annotated grid cells can be plotted on a world map using `trait_map`. Additionally, world map can be cropped to a specific region, if desired.
+
+**Example code for making trait map:**
+```{r trait-map, fig.cap='World map showing fire-associated enrichment via 20,000km2 grid cells', out.width='100%', fig.asp=1, fig.align='center', eval=TRUE, message=FALSE, warning=FALSE, dpi=400}
+
+#plot trait data on world map
+library(ggplot2)
+fire_enrich <- sf::st_as_sf(fire_enrich) #convert enrichment table back to sf
+map <- trait_map(fire_enrich, aes_mapping = aes(fill=trait_ratio),
+                 color=NA, alpha=0.95, size=0.1)
+map
+
+```
+
+**Example code for making trait map of specific region:**
+```{r US-map, fig.cap='United States map showing fire-associated enrichment via 20,000km2 grid cells', out.width='100%', fig.asp=1, fig.align='center', eval=TRUE, message=FALSE, warning=FALSE, dpi=400}
+
+#Because sample data in from US only, crop world map to focus on US region 
+map+
+  ylim(c(300000,6000000))+
+  xlim(c(-18000000,-6000000))
+
+```
